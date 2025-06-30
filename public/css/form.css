@@ -1,0 +1,193 @@
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f7fb;
+        margin: 0;
+        padding: 0;
+      }
+      #navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #007bff;
+        color: white;
+        padding: 15px 20px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+      #navbar button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .tab-bar,
+      .filters {
+        display: flex;
+        gap: 8px;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+      .tab-bar button,
+      .filters button {
+        padding: 6px 12px;
+        border: 1px solid #007bff;
+        background-color: white;
+        color: #007bff;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .tab-bar button.active,
+      .filters button.active {
+        background-color: #007bff;
+        color: white;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        margin: 0 auto 20px auto;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+      }
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+      tr.accepted {
+        background-color: #d4edda;
+      }
+      tr.rejected {
+        background-color: #f8d7da;
+      }
+      #formContainer {
+        background: white;
+        margin: 10px 15px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      }
+     .form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .form-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+  }
+
+  .form-container td,
+  .form-container th {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .form-container .section-header {
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: -1px;
+  }
+
+  .form-container .bold {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    white-space: nowrap;
+    width: 150px;
+  }
+
+  .form-container input[type="text"],
+  .form-container input[type="date"],
+  .form-container select {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+    transition: border 0.3s, box-shadow 0.3s;
+  }
+
+  .form-container input[type="text"]:focus,
+  .form-container input[type="date"]:focus,
+  .form-container select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    outline: none;
+  }
+
+  .form-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #007bff;
+    cursor: pointer;
+  }
+
+  .form-container .checkbox-cell {
+    text-align: center;
+    width: 30px;
+  }
+
+  .form-container .logo {
+    display: block;
+    margin: auto;
+    max-height: 60px;
+  }
+
+  .form-container button[type="submit"] {
+    margin-top: 15px;
+    padding: 8px 16px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .form-container button[type="submit"]:hover {
+    background-color: darkgreen;
+  }
+
+  @media print {
+    .form-container {
+      box-shadow: none;
+      border: none;
+    }
+
+    .form-container .section-header {
+      background: #e0e0e0 !important;
+      color: black !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .form-container input,
+    .form-container select {
+      border: none;
+      background: transparent;
+    }
+
+    .form-container button {
+      display: none;
+    }
+  }

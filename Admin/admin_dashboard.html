@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin_dashboard.css" />
+  <link rel="stylesheet" href="project.css" />
+  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2>Admin</h2>
+      <ul>
+        <li class="active" onclick="showSection('dashboardSection', this)">Dashboard</li>
+        <li onclick="showSection('usersSection', this)">Users</li>
+        <li onclick="showSection('specificTimesheetSection', this)">SpecificTimesheet</li>
+        <li onclick="showMissingTimesheetUsers()">Status</li>
+        <li onclick="showSection('projectsSection', this)">Projects</li>
+        <li onclick="alert('Still in implementation')">Analytics</li>
+        <li onclick="showLogoutModal()">Logout</li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <!-- Top navbar -->
+      <nav class="navbar">
+        <div class="navbar-left">
+        </div>
+      </nav>
+
+      <!-- DASHBOARD SECTION -->
+      <section id="dashboardSection" class="section">
+        <div class="cards">
+          <div class="card">
+            <h3>Total Users</h3>
+            <p id="totalUsers">Loading...</p>
+          </div>
+          <div class="card">
+            <h3>Active Projects</h3>
+            <p id="activeProjects">Loading...</p>
+          </div>
+
+          <!-- Blocked Tasks Card -->
+          <div class="card" onclick="showTaskDetails('blocked')">
+            <h3>Blocked Tasks</h3>
+            <p id="blockedTasks">Loading...</p>
+          </div>
+
+          <!-- Delayed Tasks Card -->
+          <div class="card" onclick="showTaskDetails('delayed')">
+            <h3>Delayed Tasks</h3>
+            <p id="delayedTasks">Loading...</p>
+          </div>
+        </div>
+
+        <!-- Task Details Section -->
+        <div class="cards" style="margin-top: 30px; display: none;" id="taskDetailsSection">
+          <div class="card full-width">
+            <h3 id="taskDetailsTitle">Task Details</h3>
+            <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Utilized Hour</th>
+                </tr>
+              </thead>
+              <tbody id="taskDetailsBody">
+                <!-- Tasks will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div style="display: flex; justify-content: space-between; margin: 20px;">
+          <!-- Software Development Bar Chart -->
+          <div style="width: 48%; height: 450px; overflow: hidden;">
+            <canvas id="softwareBarChart" width="1200" height="400"></canvas>
+          </div>
+
+          <!-- Mechanical Bar Chart -->
+          <div style="width: 48%; height: 450px; overflow: hidden;">
+            <canvas id="mechanicalBarChart" width="1200" height="400"></canvas>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin: 20px;">
+          <div style="width: 48%; height: 450px; overflow: hidden;">
+            <canvas id="statusHorizontalBarChart" width="1200" height="400"></canvas>
+          </div>
+
+          <!-- Mechanical Horizontal Status Bar Chart -->
+          <div style="width: 48%; height: 450px; overflow: hidden; margin: 20px;">
+            <canvas id="mechanicalStatusHorizontalBarChart" width="1200" height="400"></canvas>
+          </div>
+        </div>
+      </section>
+
+      
+
+      <!-- USERS SECTION -->
+      <section id="usersSection" class="section hidden">
+        <h1>All Users Data</h1>
+        <div class="search-container">
+          <input type="text" id="userSearchInput" placeholder="Search user by name..." />
+          <div id="noUserFoundMessage" style="display: none; color: red; font-weight: bold;">
+            No user found
+          </div>
+        </div>
+
+        <div class="button-group">
+          <select id="year">
+            <!-- Years will be populated dynamically -->
+          </select>
+          <select id="month">
+            <option value="jan">January</option>
+            <option value="feb">February</option>
+            <option value="mar">March</option>
+            <option value="apr">April</option>
+            <option value="may">May</option>
+            <option value="jun">June</option>
+            <option value="jul">July</option>
+            <option value="aug">August</option>
+            <option value="sep">September</option>
+            <option value="oct">October</option>
+            <option value="nov">November</option>
+            <option value="dec">December</option>
+          </select>
+          <button id="generateTimesheetPivot">📊 All Users Timesheet</button>
+          <button id="generateDailyPivot">🗓️ All Users Dailysheet</button>
+
+          <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <span>Generating timesheets...</span>
+          </div>
+
+          <div id="container" class="all-users-container"></div>
+          <div class="user-container" id="userDropdownContainer"></div>
+      </section>
+
+      <section id="specificTimesheetSection" class="hidden">
+        <iframe src="h.html" style="width: 100%; height: 100vh; border: none"></iframe>
+      </section>
+
+      <!-- Add this modal to your HTML -->
+      <div id="missingTimesheetModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeMissingTimesheetModal()">&times;</span>
+          <h2>Users Missing Timesheet</h2>
+
+          <!-- Simplified status display -->
+          <div id="missingDateDisplay" class="status-display"></div>
+          <div id="monitoringStatus" class="status-display"></div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Employee ID</th>
+                  <th>Stream</th>
+                </tr>
+              </thead>
+              <tbody id="missingUsersTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer">
+            <button onclick="exportMissingUsersToCSV()" class="export-btn">
+              Export to CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="logoutModal">
+        <div class="modal-content">
+          <div class="lock-icon-wrapper">
+            🔒
+          </div>
+          <h2 class="modal-heading">Logout Confirmation</h2>
+          <p class="modal-subtext">Are you sure you want to logout?</p>
+          <button onclick="confirmLogout()">✅ Yes, Logout</button>
+          <button onclick="closeLogoutModal()" class="cancel-btn">❌ Cancel</button>
+        </div>
+      </div>
+
+      <!-- PROJECTS SECTION -->
+  <section id="projectsSection" class="section hidden">
+  <div class="timesheet-container">
+    <h2>Project Management</h2>
+
+    <!-- Search and Filter -->
+    <div class="project-controls">
+      <input type="text" id="projectSearch" placeholder="Search projects..." />
+      <button id="addProjectBtn">+ Add New Project</button>
+    </div>
+
+    <!-- Projects Display -->
+    <div id="projectsDisplay" class="projects-grid"></div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3 id="modalTitle">Add New Project</h3>
+        <form id="projectForm">
+          <input type="hidden" id="projectId" />
+          <div class="form-group">
+            <label for="projectHead">Category:</label>
+            <select id="projectHead" required>
+              <option value="">Select a category</option>
+              <option value="Mechanical">MAE</option>
+              <option value="Software">UA</option>
+              <option value="Internal">Internal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="projectSub">Subcategory:</label>
+            <select id="projectSub" required>
+              <option value="">Select subcategory</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="projectName">Project Name:</label>
+            <input type="text" id="projectName" required />
+          </div>
+          <button type="submit">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const fixedStructure = {
+    Mechanical: ["SW", "Mech"],
+    Software: ["SW", "Mech"],
+    Internal: ["SW", "Mech"],
+  };
+
+  const projectHead = document.getElementById("projectHead");
+  const projectSub = document.getElementById("projectSub");
+  const projectsDisplay = document.getElementById("projectsDisplay");
+  const projectSearch = document.getElementById("projectSearch");
+  const addProjectBtn = document.getElementById("addProjectBtn");
+  const projectModal = document.getElementById("projectModal");
+  const projectForm = document.getElementById("projectForm");
+  const modalTitle = document.getElementById("modalTitle");
+  const closeModal = document.querySelector(".close-modal");
+  const projectIdInput = document.getElementById("projectId");
+  const projectNameInput = document.getElementById("projectName");
+
+  let currentProjects = [];
+
+  // Handle category -> subcategory population
+  projectHead.addEventListener("change", () => {
+    const selected = projectHead.value;
+    projectSub.innerHTML = '<option value="">Select subcategory</option>';
+    if (fixedStructure[selected]) {
+      fixedStructure[selected].forEach((sub) => {
+        const opt = document.createElement("option");
+        opt.value = sub;
+        opt.textContent = sub;
+        projectSub.appendChild(opt);
+      });
+    }
+  });
+
+  async function loadProjects() {
+    try {
+      const response = await fetch("/api/projects");
+      if (!response.ok) throw new Error("Failed to fetch projects");
+      const data = await response.json();
+      currentProjects = data.projects || [];
+      renderProjects(currentProjects);
+    } catch (err) {
+      alert("Error loading projects.");
+      console.error(err);
+    }
+  }
+
+  function renderProjects(projects) {
+  projectsDisplay.innerHTML = '';
+
+  if (projects.length === 0) {
+    projectsDisplay.innerHTML = '<p class="no-projects">No projects found</p>';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'project-table';
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Project Type</th>
+        <th>Project Category</th>
+        <th>Project Name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${projects.map(project => `
+        <tr>
+          <td>${project.head}</td>
+          <td>${project.subcategory}</td>
+          <td>${project.name}</td>
+          <td>
+            <button class="edit-btn" data-id="${project._id}">Edit</button>
+            <button class="delete-btn" data-id="${project._id}">Delete</button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+
+  projectsDisplay.appendChild(table);
+}
+
+
+  projectSearch.addEventListener("input", () => {
+    const term = projectSearch.value.toLowerCase();
+    const filtered = currentProjects.filter((p) =>
+      p.name.toLowerCase().includes(term)
+    );
+    renderProjects(filtered);
+  });
+
+  addProjectBtn.addEventListener("click", () => {
+    projectForm.reset();
+    projectIdInput.value = "";
+    projectSub.innerHTML = '<option value="">Select subcategory</option>';
+    modalTitle.textContent = "Add New Project";
+    projectModal.classList.remove("hidden");
+  });
+
+  closeModal.addEventListener("click", () => {
+    projectModal.classList.add("hidden");
+  });
+
+  projectForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = projectIdInput.value;
+    const method = id ? "PUT" : "POST";
+    const url = id ? `/api/projects/${id}` : "/api/projects";
+
+    const payload = {
+      head: projectHead.value,
+      subcategory: projectSub.value,
+      name: projectNameInput.value,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Save failed");
+
+      projectModal.classList.add("hidden");
+      await loadProjects();
+    } catch (err) {
+      alert("Error saving project.");
+      console.error(err);
+    }
+  });
+
+  projectsDisplay.addEventListener("click", async (e) => {
+    const editBtn = e.target.closest(".edit-btn");
+    const deleteBtn = e.target.closest(".delete-btn");
+
+    if (editBtn) {
+      const project = currentProjects.find((p) => p._id === editBtn.dataset.id);
+      if (project) {
+        projectIdInput.value = project._id;
+        projectHead.value = project.head;
+        projectHead.dispatchEvent(new Event("change"));
+
+        setTimeout(() => {
+          projectSub.value = project.subcategory;
+        }, 100);
+
+        projectNameInput.value = project.name;
+        modalTitle.textContent = "Edit Project";
+        projectModal.classList.remove("hidden");
+      }
+    }
+
+    if (deleteBtn) {
+      if (confirm("Delete this project?")) {
+        try {
+          const res = await fetch(`/api/projects/${deleteBtn.dataset.id}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) throw new Error("Delete failed");
+          await loadProjects();
+        } catch (err) {
+          alert("Error deleting project.");
+          console.error(err);
+        }
+      }
+    }
+  });
+
+  // Initial Load
+  loadProjects();
+});
+</script>
+
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+      <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.full.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+      <script src="admin_dashboard.js"></script>
+
+    </main>
+  </div>
+</body>
+
+</html>

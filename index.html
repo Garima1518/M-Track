@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Login | MinebeaMitsumi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="public/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="fontawesome/css/all.min.css" />
+    <link rel="stylesheet" href="public/css/slick.css" />
+    <link rel="stylesheet" href="public/css/tooplate-simply-amazed.css" />
+    <link rel="stylesheet" href="public/css/dashboard.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <style>
+    .request-form-fixed {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      animation: slideInUp 0.8s ease-out both;
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(60px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .gif-container {
+      width: 160px;
+      height: auto;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.25));
+    }
+
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    .pencil-gif {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    /* Glowing Gradient Button */
+    .request-form-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 40px;
+      color: #fff;
+      background: linear-gradient(135deg, #2c7be5, #155ab8);
+      box-shadow: 0 8px 20px rgba(21, 90, 184, 0.3);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      animation: pulseGlow 3s infinite;
+      border: none;
+    }
+
+    @keyframes pulseGlow {
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(21, 90, 184, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 14px rgba(21, 90, 184, 0);
+      }
+    }
+
+    .request-form-btn:hover {
+      background: linear-gradient(135deg, #1a68d1, #0d4a9b);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(21, 90, 184, 0.4);
+    }
+
+    .request-form-btn:active {
+      transform: translateY(0px);
+      box-shadow: 0 4px 12px rgba(21, 90, 184, 0.2);
+    }
+
+    .request-form-btn i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    /* Responsive behavior */
+    @media (max-width: 600px) {
+      .gif-container {
+        width: 120px;
+      }
+
+      .request-form-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+
+      .request-form-fixed {
+        right: 16px;
+        bottom: 20px;
+      }
+    }
+  </style>
+  <body>
+    <section
+      class="gallery-section section parallax-window"
+      data-parallax="scroll"
+      data-image-src="/images/section-3-bg.jpg"
+      id="section-3"
+    >
+      <div class="container text-center">
+        <!-- Top Logo + Robot -->
+        <div class="auth-header">
+          <img
+            src="public/img/xran.gif"
+            alt="XRangers Bot"
+            class="particle-gif left-shift"
+          />
+          <img
+            src="public/img/minebeamitsumi.png"
+            alt="MinebeaMitsumi Logo"
+            class="logo-img"
+          />
+        </div>
+
+        <div id="formContainer"></div>
+        <!-- Login Box -->
+
+        <div id="loginBox" class="form-section active">
+          <form id="loginForm">
+            <div class="input-group">
+              <label for="loginName">Name</label>
+              <input
+                type="text"
+                id="loginName"
+                placeholder="Enter your name"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label for="loginEmployeeId">Employee Code</label>
+              <input
+                type="text"
+                id="loginEmployeeId"
+                placeholder="Enter your Employee Code"
+                inputmode="numeric"
+                pattern="\d*"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                required
+              />
+            </div>
+
+            <button type="submit">Login</button>
+          </form>
+          <p id="loginErrorMessage"></p>
+          <p>
+            Don't have an account?
+            <a href="javascript:void(0);" onclick="toggleForm('signup')"
+              >Sign Up</a
+            >
+          </p>
+          <p class="text-link">
+            <a onclick="toggleForm('adminBox')"><b>Admin Login</b></a>
+          </p>
+        </div>
+
+        <!-- Signup Box -->
+        <div id="signupBox" style="display: none" class="form-section">
+          <form id="signupForm">
+            <div class="input-group">
+              <label for="signupName">Name</label>
+              <input
+                type="text"
+                id="signupName"
+                placeholder="Enter your name"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label for="signupEmployeeId">Employee Code</label>
+              <input
+                type="text"
+                id="signupEmployeeId"
+                placeholder="Enter your Employee Code"
+                inputmode="numeric"
+                pattern="\d*"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                required
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="signupStream">Department</label>
+              <select id="signupStream" required>
+                <option value="">Select Department</option>
+                <option value="Software Development">Software</option>
+                <option value="Mechanical">Mechanical</option>
+              </select>
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+          <p id="signupErrorMessage" style="color: red"></p>
+          <p>
+            Already have an account?
+            <a href="javascript:void(0);" onclick="toggleForm('login')"
+              >Login</a
+            >
+          </p>
+        </div>
+
+        <!-- Admin Login Box -->
+        <div id="adminBox" style="display: none" class="form-section">
+          <form id="adminForm">
+            <div class="input-group">
+              <label for="adminName">Admin Name</label>
+              <input
+                type="text"
+                id="adminName"
+                placeholder="Enter Admin Name"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label for="adminpass">Password</label>
+              <input
+                type="password"
+                id="adminpass"
+                placeholder="Enter Password"
+                required
+                style="padding-right: 40px; position: relative"
+              />
+              <i
+                id="toggleAdminPassword"
+                class="fas fa-eye"
+                style="
+                  color: black;
+                  position: absolute;
+                  right: 80px;
+                  margin-top: 45px;
+                  cursor: pointer;
+                "
+              ></i>
+            </div>
+
+            <button type="submit">Login as Admin</button>
+          </form>
+          <div id="errorMessage"></div>
+
+          <p class="text-link">
+            Go back to
+            <a href="javascript:void(0);" onclick="toggleForm('login')"
+              >User Login</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="request-form-fixed">
+        <div class="gif-container">
+          <img
+            src="https://media4.giphy.com/media/v1.Y2lkPTZjMDliOTUybTk2ZnAwYXU3OXBqdmEzcGVkb2FwdGZrenlsOXdzY3Y1a3R5bDQ1cCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/L5LKlZHHCSOaY/source.gif"
+            alt="Request Form GIF"
+            class="pencil-gif"
+          />
+        </div>
+        <a href="dashboard.html" class="request-form-btn">
+          <i class="fas fa-file-alt"></i> Request Form
+        </a>
+      </div>
+    </section>
+
+    <!-- Success Popup -->
+    <div id="successPopup" class="popup">
+      <div class="popup-content">
+        <p id="popupMessage">✅ Login Successful!</p>
+        <button onclick="redirectToData()">OK</button>
+      </div>
+    </div>
+
+    <script src="public/js/jquery-3.3.1.min.js"></script>
+    <script src="public/js/bootstrap.bundle.min.js"></script>
+    <script src="public/js/jquery.singlePageNav.min.js"></script>
+    <script src="public/js/slick.js"></script>
+    <script src="public/js/parallax.min.js"></script>
+    <script src="public/js/templatemo-script.js"></script>
+    <script src="public/js/slider.js"></script>
+    <script src="public/js/index.js"></script>
+    <script src="/js/script.js"></script>
+  </body>
+</html>

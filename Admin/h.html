@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Timesheet Download</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f7fa;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .header h1 {
+        color: #2c3e50;
+        margin: 0;
+      }
+
+      .month-selector {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      select {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background-color: white;
+      }
+
+      .user-select-container {
+        margin: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-width: 600px;
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .user-search-input {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border 0.3s;
+      }
+
+      .user-search-input:focus {
+        border-color: #4caf50;
+        outline: none;
+      }
+
+      .select-container {
+        width: 100%;
+        position: relative;
+      }
+
+      .user-multi-select {
+        width: 100%;
+        min-height: 180px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        font-size: 14px;
+        transition: border 0.3s;
+      }
+
+      .user-multi-select:focus {
+        border-color: #4caf50;
+        outline: none;
+      }
+
+      .user-multi-select option {
+        padding: 10px 8px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+      }
+
+      .user-multi-select option:hover {
+        background-color: #f5f5f5;
+      }
+
+      .all-users-option {
+        font-weight: bold;
+        background-color: #e9f7fe;
+        color: #0066cc;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .download-btn {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .download-btn:hover {
+        background-color: #45a049;
+        transform: translateY(-1px);
+      }
+
+      .download-btn:active {
+        transform: translateY(0);
+      }
+
+      .help-text {
+        font-size: 13px;
+        color: #666;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .user-count {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+
+        .month-selector {
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
+        .user-select-container {
+          padding: 15px;
+        }
+
+        .user-multi-select {
+          min-height: 150px;
+        }
+      }
+
+      /* Loading indicator */
+      .loading {
+        display: none;
+        margin-top: 15px;
+        text-align: center;
+      }
+
+      .spinner {
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 3px solid #4caf50;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .checkbox-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .checkbox-item {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .user-search-input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Timesheet Download</h1>
+        <div class="month-selector">
+          <select id="year">
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025" selected>2025</option>
+          </select>
+          <select id="month">
+            <option value="january">January</option>
+            <option value="february">February</option>
+            <option value="march">March</option>
+            <option value="april">April</option>
+            <option value="may">May</option>
+            <option value="june" selected>June</option>
+            <option value="july">July</option>
+            <option value="august">August</option>
+            <option value="september">September</option>
+            <option value="october">October</option>
+            <option value="november">November</option>
+            <option value="december">December</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="userSelectContainer" class="user-select-container"></div>
+
+      <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <span>Generating timesheets...</span>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeUserSelection();
+      });
+
+      let cachedUserData = [];
+      let currentSelectedRegion = null;
+      let regionProjectsNormalized = {};
+      let summaryRows;
+
+      const regionProjects = {
+        Erdweg: [
+          "DevOps and Tools",
+          "UBSW Project",
+          "NFC",
+          "BSW",
+          "J4U",
+          "AutoSAR- MAE",
+          "BMW-XNF",
+          "Audi e-Ring",
+          "Support To Erdweg",
+        ],
+        Italy: [
+          "Flush Handle Support to Italy",
+          "Audi E-Wing",
+          "MAZDA CX5 - Demo Car",
+          "ID5 - Demo Car",
+          "Motorized  E-wing",
+          "RSA 15-40",
+          "FCA 356",
+          "FRONT FLUSH",
+          "PSA E-FLUSH LP3",
+          "PSA-D34",
+          "PSA-D-CROSS REAR",
+          "BMW wing handle",
+          "RR 45",
+          "VW Handle",
+          "Scout Handle",
+          "Audi E-Flush RFQ",
+        ],
+      };
+
+      function initializeUserSelection() {
+        regionProjectsNormalized = {};
+        for (const [region, projects] of Object.entries(regionProjects)) {
+          regionProjectsNormalized[region] = projects.map((p) =>
+            p.trim().toLowerCase()
+          );
+        }
+
+        const userSelectContainer = document.getElementById(
+          "userSelectContainer"
+        );
+        userSelectContainer.innerHTML = "";
+
+        const searchBox = document.createElement("input");
+        searchBox.type = "text";
+        searchBox.id = "userSearch";
+        searchBox.placeholder = "Search user by name";
+        searchBox.className = "user-search-input";
+
+        const userListContainer = document.createElement("div");
+        userListContainer.id = "userList";
+        userListContainer.className = "checkbox-list";
+
+        // Select All Checkbox
+        const selectAllLabel = document.createElement("label");
+        selectAllLabel.className = "checkbox-item";
+        selectAllLabel.style.fontWeight = "bold";
+
+        const selectAllCheckbox = document.createElement("input");
+        selectAllCheckbox.type = "checkbox";
+        selectAllCheckbox.id = "selectAllUsers";
+
+        selectAllCheckbox.addEventListener("change", () => {
+          const allCheckboxes = document.querySelectorAll(".user-checkbox");
+          allCheckboxes.forEach((cb) => {
+            cb.checked = selectAllCheckbox.checked;
+            if (selectAllCheckbox.checked) {
+              currentSelectedRegion = null;
+              updateRegionDisplay();
+            }
+          });
+          updateUserCount();
+        });
+
+        selectAllLabel.appendChild(selectAllCheckbox);
+        selectAllLabel.appendChild(
+          document.createTextNode(" Select All Users")
+        );
+        userListContainer.appendChild(selectAllLabel);
+
+        const regionButtonContainer = document.createElement("div");
+        regionButtonContainer.className = "region-buttons";
+        regionButtonContainer.style.display = "flex";
+        regionButtonContainer.style.gap = "10px";
+        regionButtonContainer.style.flexWrap = "wrap";
+
+        ["Erdweg", "Italy"].forEach((region) => {
+          const btn = document.createElement("button");
+          btn.textContent = `Select ${region}`;
+          btn.className = "btn region-btn";
+          btn.setAttribute("data-region", region);
+          btn.style.cssText = `
+          background-color: #2196f3;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+          transition: background 0.3s;
+        `;
+          btn.addEventListener(
+            "mouseover",
+            () => (btn.style.backgroundColor = "#1976d2")
+          );
+          btn.addEventListener(
+            "mouseout",
+            () => (btn.style.backgroundColor = "#2196f3")
+          );
+          btn.addEventListener("click", () => {
+            handleRegionFilter(region);
+            document.getElementById("selectAllUsers").checked = false;
+          });
+          regionButtonContainer.appendChild(btn);
+        });
+
+        userListContainer.appendChild(regionButtonContainer);
+
+        const userCount = document.createElement("div");
+        userCount.className = "user-count";
+        userCount.id = "selectedUserCount";
+        userCount.textContent = "0 users selected";
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "button-container";
+
+        const downloadBtn = document.createElement("button");
+        downloadBtn.id = "downloadSelectedTimesheet";
+        downloadBtn.textContent = "Download Selected Timesheets";
+        downloadBtn.className = "btn download-btn";
+        downloadBtn.onclick = downloadSelectedTimesheet;
+
+        buttonContainer.appendChild(downloadBtn);
+
+        const helpText = document.createElement("div");
+        helpText.className = "help-text";
+        helpText.innerHTML =
+          '<i class="fas fa-info-circle"></i> Use checkboxes to select multiple users';
+
+        userSelectContainer.appendChild(searchBox);
+        userSelectContainer.appendChild(userListContainer);
+        userSelectContainer.appendChild(userCount);
+        userSelectContainer.appendChild(buttonContainer);
+        userSelectContainer.appendChild(helpText);
+
+        fetch("http://localhost:3000/api/all-user-data")
+          .then((res) => res.json())
+          .then((data) => {
+            cachedUserData = data.usersData;
+
+            cachedUserData
+              .sort((a, b) =>
+                (a.userInfo.name || "").localeCompare(b.userInfo.name || "")
+              )
+              .forEach((user) => {
+                const wrapper = document.createElement("label");
+                wrapper.className = "checkbox-item";
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = user.userInfo.employeeId;
+                checkbox.className = "user-checkbox";
+                checkbox.setAttribute(
+                  "data-region",
+                  user.userInfo.region || "unknown"
+                );
+
+                const span = document.createElement("span");
+                span.textContent = `${user.userInfo.name || ""}`;
+
+                checkbox.addEventListener("change", () => {
+                  if (!checkbox.checked) {
+                    document.getElementById("selectAllUsers").checked = false;
+                  } else {
+                    // When checking a user, check if all are now checked
+                    const allChecked =
+                      document.querySelectorAll(".user-checkbox:checked")
+                        .length ===
+                      document.querySelectorAll(".user-checkbox").length;
+                    if (allChecked) {
+                      document.getElementById("selectAllUsers").checked = true;
+                      currentSelectedRegion = null;
+                      updateRegionDisplay();
+                    }
+                  }
+                  updateUserCount();
+                });
+
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(span);
+                userListContainer.appendChild(wrapper);
+              });
+
+            searchBox.addEventListener("input", function () {
+              const term = this.value.toLowerCase();
+              document.querySelectorAll(".checkbox-item").forEach((label) => {
+                const labelText = label.textContent.toLowerCase();
+                label.style.display = labelText.includes(term) ? "" : "none";
+              });
+            });
+          })
+          .catch((error) => {
+            userSelectContainer.innerHTML = `
+            <div style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 4px;">
+              <i class="fas fa-exclamation-circle"></i> Failed to load user data. Please try again later.
+            </div>`;
+            console.error("Error loading user data:", error);
+          });
+      }
+
+      function updateRegionDisplay(text = null) {
+        const regionDisplay =
+          document.getElementById("selectedRegionDisplay") ||
+          document.createElement("div");
+        regionDisplay.id = "selectedRegionDisplay";
+        regionDisplay.style.margin = "10px 0";
+        regionDisplay.style.fontWeight = "bold";
+        regionDisplay.textContent =
+          text ||
+          (currentSelectedRegion
+            ? `Filtering for ${currentSelectedRegion} projects`
+            : "Showing all projects");
+
+        const buttonContainer = document.querySelector(".button-container");
+        if (!document.getElementById("selectedRegionDisplay")) {
+          buttonContainer.prepend(regionDisplay);
+        }
+      }
+
+      function updateUserCount() {
+        const checkboxes = document.querySelectorAll(".user-checkbox");
+        const checked = document.querySelectorAll(".user-checkbox:checked");
+
+        const count = checked.length;
+        document.getElementById(
+          "selectedUserCount"
+        ).textContent = `${count} user${count !== 1 ? "s" : ""} selected`;
+
+        const selectAllCheckbox = document.getElementById("selectAllUsers");
+        if (selectAllCheckbox) {
+          selectAllCheckbox.checked = count === checkboxes.length;
+          selectAllCheckbox.indeterminate =
+            count > 0 && count < checkboxes.length;
+        }
+      }
+
+      function handleRegionFilter(region) {
+        document
+          .querySelectorAll(".user-checkbox")
+          .forEach((cb) => (cb.checked = false));
+
+        const monthIndex = 5;
+        const year = 2025;
+        const startDate = new Date(year, monthIndex - 1, 25);
+        const endDate = new Date(year, monthIndex, 24);
+
+        currentSelectedRegion = region;
+        const allowedProjects = regionProjectsNormalized[region] || [];
+        const checkboxes = document.querySelectorAll(".user-checkbox");
+
+        checkboxes.forEach((cb) => {
+          const userId = cb.value;
+          const user = cachedUserData.find(
+            (u) => u.userInfo.employeeId === userId
+          );
+          if (!user || !user.entries) return;
+
+          const relevantEntries = user.entries.filter((entry) => {
+            const entryDate = new Date(entry.date);
+            if (entryDate < startDate || entryDate > endDate) return false;
+
+            const projectName = (entry.project || "").trim().toLowerCase();
+            if (!allowedProjects.includes(projectName)) return false;
+
+            const utilized = parseFloat(entry.utilizedHour || 0);
+            const available = parseFloat(entry.availableHour || 0);
+            return utilized > 0 || available > 0;
+          });
+
+          cb.checked = relevantEntries.length > 0;
+        });
+
+        updateUserCount();
+        updateRegionDisplay();
+      }
+
+      function getUserRegion(user) {
+        if (!user.entries || user.entries.length === 0) return null;
+
+        for (const [region, projects] of Object.entries(
+          regionProjectsNormalized
+        )) {
+          const hasMatch = user.entries.some((entry) => {
+            const projectName = (entry.project || "").trim().toLowerCase();
+            return projects.includes(projectName);
+          });
+          if (hasMatch) return region;
+        }
+        return null;
+      }
+
+      async function downloadSelectedTimesheet() {
+        const selectedCheckboxes = document.querySelectorAll(
+          ".user-checkbox:checked"
+        );
+        const selectedOptions = Array.from(selectedCheckboxes).map(
+          (checkbox) => ({
+            value: checkbox.value,
+          })
+        );
+
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        if (selectedOptions.length === 0) {
+          alert("Please select at least one user");
+          return;
+        }
+
+        loadingIndicator.style.display = "block";
+
+        try {
+          const monthSelect = document.getElementById("month");
+          const yearSelect = document.getElementById("year");
+          const selectedMonth = monthSelect.value;
+          const selectedYear = yearSelect.value;
+
+          const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          const monthIndex = monthNames.findIndex((name) =>
+            name.toLowerCase().startsWith(selectedMonth.toLowerCase())
+          );
+          if (monthIndex === -1) throw new Error("Invalid month selected");
+
+          const currentYear = parseInt(selectedYear);
+          const startDate = new Date(currentYear, monthIndex - 1, 25);
+          const endDate = new Date(currentYear, monthIndex, 24);
+
+          const res = await fetch("http://localhost:3000/api/all-user-data");
+          if (!res.ok) throw new Error("Failed to fetch user data");
+          const data = await res.json();
+
+          const workbook = new ExcelJS.Workbook();
+          workbook.creator = "Timesheet System";
+          workbook.created = new Date();
+
+          // Generate date range
+          const dateArray = [];
+          let currentDate = new Date(startDate);
+          while (currentDate <= endDate) {
+            dateArray.push(formatDate(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          const globalColSum = new Array(dateArray.length).fill(0);
+          const allSheetData = [];
+
+          // Get only the checked users' data
+          const selectedUsers = selectedOptions
+            .map((opt) =>
+              data.usersData.find((u) => u.userInfo.employeeId === opt.value)
+            )
+            .filter(Boolean);
+
+          const selectAllChecked =
+            document.getElementById("selectAllUsers").checked;
+
+          // Process each selected user
+          for (const user of selectedUsers) {
+            const rawName = (user.userInfo.name || "")
+              .replace(/[\w.-]+@[\w.-]+\.\w+/g, "")
+              .trim();
+            const empId = user.userInfo.employeeId || "ID";
+            const sheetName = `${rawName} (${empId})`.substring(0, 31);
+            const worksheet = workbook.addWorksheet(sheetName);
+
+            // Get all entries for the user (filtered by region if not in Select All mode)
+            let filteredEntries = user.entries || [];
+
+            // Only filter by region if not in Select All mode and a region is selected
+            if (!selectAllChecked && currentSelectedRegion) {
+              const allowedProjects =
+                regionProjects[currentSelectedRegion] || [];
+              filteredEntries = filteredEntries.filter((entry) => {
+                const projectName = (entry.project || "").trim().toLowerCase();
+                return allowedProjects.includes(entry.project);
+              });
+            }
+
+            // Build pivot data
+            const pivotData = {};
+            filteredEntries.forEach((entry) => {
+              const entryDate = entry.date?.slice(0, 10);
+              if (entryDate && dateArray.includes(entryDate)) {
+                const key = `${entry.project || "-"}|${entry.code || "-"}|${
+                  entry.description || "-"
+                }|${entry.ji || "-"}`;
+                if (!pivotData[key]) pivotData[key] = {};
+                pivotData[key][entryDate] =
+                  (pivotData[key][entryDate] || 0) +
+                  (parseFloat(entry.utilizedHour) || 0);
+              }
+            });
+
+            // Worksheet headers
+            const headerRow = [
+              "Project",
+              "Code",
+              "Description",
+              "JI",
+              ...dateArray,
+              "Sum",
+            ];
+            const colSum = new Array(dateArray.length).fill(0);
+
+            worksheet.addRow(["U-SHIN INDIA PRIVATE LIMITED"]).font = {
+              bold: true,
+              size: 16,
+            };
+            worksheet.addRow([
+              `Month: ${monthNames[monthIndex]} ${currentYear} (${formatDate(
+                startDate
+              )} to ${formatDate(endDate)})`,
+            ]).font = { italic: true };
+            worksheet.addRow([`Name: ${rawName}`]);
+            worksheet.addRow([]);
+
+            const header = worksheet.addRow(headerRow);
+            header.eachCell((cell) => {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFD9D9D9" },
+              };
+              cell.font = { bold: true };
+              cell.alignment = { horizontal: "center" };
+            });
+
+            // Add project rows
+            Object.entries(pivotData).forEach(([key, hoursPerDate]) => {
+              const [project, code, description, ji] = key.split("|");
+              const rowVals = [project, code, description, ji];
+              let rowSum = 0;
+
+              dateArray.forEach((date, idx) => {
+                const hrs = Number(hoursPerDate[date]) || 0;
+                rowVals.push(hrs);
+                colSum[idx] += hrs;
+                globalColSum[idx] += hrs;
+                rowSum += hrs;
+              });
+
+              rowVals.push(rowSum);
+              const addedRow = worksheet.addRow(rowVals);
+
+              // Highlight empty rows
+              if (rowSum === 0) {
+                addedRow.eachCell((cell) => {
+                  cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFFF0000" },
+                  };
+                  cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+                });
+              }
+
+              allSheetData.push([`${rawName} (${empId})`, ...rowVals]);
+            });
+
+            // Add totals row
+            const totalRow = worksheet.addRow([
+              "Total",
+              "",
+              "",
+              "",
+              ...colSum,
+              colSum.reduce((a, b) => a + b, 0),
+            ]);
+            totalRow.eachCell((cell) => {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFFFFF00" },
+              };
+              cell.font = { bold: true };
+              cell.alignment = { horizontal: "center" };
+            });
+
+            // Highlight date columns where total = 0 and date is in the past
+            dateArray.forEach((dateStr, idx) => {
+              const isPast = new Date(dateStr) <= new Date();
+              if (isPast && colSum[idx] === 0) {
+                const dataStartRow = header.number + 1;
+                const dataEndRow = totalRow.number - 1;
+
+                for (
+                  let rowIdx = dataStartRow;
+                  rowIdx <= dataEndRow;
+                  rowIdx++
+                ) {
+                  const cell = worksheet.getRow(rowIdx).getCell(5 + idx);
+                  cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFFF0000" },
+                  };
+                  cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+                }
+              }
+            });
+
+            worksheet.columns.forEach((col) => (col.width = 18));
+          }
+
+          // Create consolidated "All" sheet
+          const allSheet = workbook.addWorksheet("All");
+          const allHeaderRow = [
+            "Name",
+            "Project",
+            "Code",
+            "Description",
+            "JI",
+            ...dateArray,
+            "Sum",
+          ];
+          const allColSum = new Array(dateArray.length).fill(0);
+          allSheet.addRow(allHeaderRow).eachCell((cell) => {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFD9D9D9" },
+            };
+            cell.font = { bold: true };
+            cell.alignment = { horizontal: "center" };
+          });
+
+          // Add data rows and track column totals
+          allSheetData.forEach((rowVals) => {
+            const addedRow = allSheet.addRow(rowVals);
+            const rowSum = rowVals[rowVals.length - 1];
+
+            for (let i = 0; i < dateArray.length; i++) {
+              allColSum[i] += rowVals[5 + i] || 0;
+            }
+
+            // Highlight zero-sum rows
+            if (rowSum === 0) {
+              addedRow.eachCell((cell) => {
+                cell.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFFF0000" },
+                };
+                cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+              });
+            }
+          });
+
+          // Add total row at the end
+          const totalLabelRow = ["Total", "", "", "", ""];
+          const allTotal = allColSum.reduce((a, b) => a + b, 0);
+          const totalRow = allSheet.addRow([
+            ...totalLabelRow,
+            ...allColSum,
+            allTotal,
+          ]);
+
+          totalRow.eachCell((cell) => {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFFFFF00" },
+            };
+            cell.font = { bold: true };
+            cell.alignment = { horizontal: "center" };
+          });
+
+          // Highlight columns with total 0 for past dates
+          dateArray.forEach((dateStr, idx) => {
+            const isPast = new Date(dateStr) <= new Date();
+            if (isPast && allColSum[idx] === 0) {
+              for (let r = 2; r <= allSheet.rowCount - 1; r++) {
+                const cell = allSheet.getRow(r).getCell(6 + idx);
+                cell.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFFF0000" },
+                };
+                cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+              }
+            }
+          });
+
+          // Column widths and alignment
+          allSheet.columns.forEach((col) => {
+            col.width = 18;
+            col.alignment = { horizontal: "center" };
+          });
+
+          // Create Invoice sheet for Erdweg/Italy users if not in "Select All" mode and region is selected
+          if (
+            !selectAllChecked &&
+            currentSelectedRegion &&
+            (currentSelectedRegion === "Erdweg" ||
+              currentSelectedRegion === "Italy")
+          ) {
+            createInvoiceSheet(
+              workbook,
+              selectedUsers,
+              dateArray,
+              monthNames[monthIndex],
+              currentYear
+            );
+          }
+
+          // Generate and download the file
+          const buffer = await workbook.xlsx.writeBuffer();
+          saveAs(
+            new Blob([buffer]),
+            `Timesheets_${monthNames[monthIndex]}_${currentYear}.xlsx`
+          );
+        } catch (error) {
+          console.error("Error generating timesheets:", error);
+          alert("Failed to generate timesheets: " + error.message);
+        } finally {
+          loadingIndicator.style.display = "none";
+        }
+      }
+
+      // function createInvoiceSheet(workbook, users, dateArray, monthName, year) {
+      //   const invoiceSheet = workbook.addWorksheet("Invoice");
+
+      //   const endCol = 3 + users.length;
+      //   const endColLetter = invoiceSheet.getColumn(endCol).letter;
+      //   invoiceSheet.mergeCells(`A1:${endColLetter}1`);
+
+      //   // Determine region name
+      //   let regionTitle = "Development Support Hours";
+      //   if (currentSelectedRegion) {
+      //     regionTitle = `${currentSelectedRegion} Development Support Hours`;
+      //   }
+
+      //   invoiceSheet.getCell("A1").value = regionTitle;
+      //   invoiceSheet.getCell("A1").font = { bold: true, size: 16 };
+      //   invoiceSheet.getCell("A1").alignment = { horizontal: "center" };
+
+      //   invoiceSheet.getCell("A2").value = `${monthName}, ${year}`;
+      //   invoiceSheet.getCell("B2").value = "Details";
+
+      //   // Prepare project lists per region
+      //   const allowedProjects = currentSelectedRegion ?
+      //     (regionProjects[currentSelectedRegion] || []).map(p => p.trim().toLowerCase()) :
+      //     [];
+
+      //   const displayedUsers = users.map((user) => {
+      //     const rawName = (user.userInfo.name || "").replace(/[\w.-]+@[\w.-]+\.\w+/g, "").trim();
+
+      //     let totalAvailableHours = 0;
+      //     let totalUtilizedHours = 0;
+      //     const workingDays = new Set();
+
+      //     (user.entries || []).forEach((entry) => {
+      //       const entryProject = (entry.project || "").trim().toLowerCase();
+      //       if (allowedProjects.length > 0 && !allowedProjects.includes(entryProject)) return;
+
+      //       const rawDate = entry.date;
+      //       if (!rawDate) return;
+      //       const entryDate = new Date(rawDate);
+      //       if (isNaN(entryDate)) return;
+
+      //       const formattedDate = formatDate(entryDate);
+      //       if (!dateArray.includes(formattedDate)) return;
+
+      //       const avail = parseFloat(entry.availableHour || 0);
+      //       const util = parseFloat(entry.utilizedHour || 0);
+
+      //       if (avail > 0 || util > 0) {
+      //         totalAvailableHours += avail;
+      //         totalUtilizedHours += util;
+      //         workingDays.add(formattedDate);
+      //       }
+      //     });
+
+      //     return {
+      //       name: rawName,
+      //       availableHours: totalAvailableHours,
+      //       utilizedHours: totalUtilizedHours,
+      //       workingDays: workingDays.size,
+      //       onsiteHours: 0,
+      //       onsiteDays: 0,
+      //     };
+      //   });
+
+      //   // Add user names to header
+      //   displayedUsers.forEach((user, index) => {
+      //     const col = 3 + index;
+      //     const cell = invoiceSheet.getRow(2).getCell(col);
+      //     cell.value = user.name;
+      //     cell.alignment = { horizontal: "center" };
+      //     cell.font = { bold: true };
+      //   });
+
+      //   const totalCol = 3 + displayedUsers.length;
+      //   const totalCell = invoiceSheet.getRow(2).getCell(totalCol);
+      //   totalCell.value = "Total";
+      //   totalCell.alignment = { horizontal: "center" };
+      //   totalCell.font = { bold: true };
+
+      //   // Data rows
+      //   const rows = [
+      //     ["Off-site", "Working Hours Available", ...displayedUsers.map(u => u.availableHours), displayedUsers.reduce((s, u) => s + u.availableHours, 0)],
+      //     ["", "Working Hours Utilised", ...displayedUsers.map(u => u.utilizedHours), displayedUsers.reduce((s, u) => s + u.utilizedHours, 0)],
+      //     ["", "No of Working Days", ...displayedUsers.map(u => u.workingDays), displayedUsers.reduce((s, u) => s + u.workingDays, 0)],
+      //     ["On-site", "Available Hours Onsite", ...displayedUsers.map(u => u.onsiteHours), displayedUsers.reduce((s, u) => s + u.onsiteHours, 0)],
+      //     ["", "Working Hours Onsite", ...displayedUsers.map(u => u.onsiteHours), displayedUsers.reduce((s, u) => s + u.onsiteHours, 0)],
+      //     ["", "Total No of Working Days (Onsite)", ...displayedUsers.map(u => u.onsiteDays), displayedUsers.reduce((s, u) => s + u.onsiteDays, 0)]
+      //   ];
+
+      //   // Insert rows
+      //   let rowIdx = 3;
+      //   for (let i = 0; i < rows.length; i++) {
+      //     const rowData = rows[i];
+      //     const row = invoiceSheet.getRow(rowIdx++);
+
+      //     row.getCell(1).value = rowData[0];
+      //     row.getCell(2).value = rowData[1];
+
+      //     for (let j = 0; j < displayedUsers.length + 1; j++) {
+      //       const val = rowData[2 + j] ?? "";
+      //       const cell = row.getCell(j + 3);
+      //       cell.value = val;
+      //       if (typeof val === "number" || !isNaN(val)) {
+      //         cell.numFmt = val % 1 !== 0 ? "0.0" : "0";
+      //       }
+      //       if (i < 3 && j + 2 >= 2) {
+      //         row.getCell(j + 2).fill = {
+      //           type: "pattern",
+      //           pattern: "solid",
+      //           fgColor: { argb: "FFFDD0" },
+      //         };
+      //       }
+      //     }
+
+      //     row.eachCell((cell) => {
+      //       cell.border = {
+      //         top: { style: "thin" },
+      //         left: { style: "thin" },
+      //         bottom: { style: "thin" },
+      //         right: { style: "thin" },
+      //       };
+      //     });
+      //   }
+      function createInvoiceSheet(workbook, users, dateArray, monthName, year) {
+        const invoiceSheet = workbook.addWorksheet("Invoice");
+
+        const endCol = 2 + users.length;
+        const endColLetter = invoiceSheet.getColumn(endCol).letter;
+        invoiceSheet.mergeCells(`A1:${endColLetter}1`);
+
+        // Region title
+        let regionTitle = "Development Support Hours";
+        if (currentSelectedRegion) {
+          regionTitle = `${currentSelectedRegion} Development Support Hours`;
+        }
+
+        invoiceSheet.getCell("A1").value = regionTitle;
+        invoiceSheet.getCell("A1").font = { bold: true, size: 16 };
+        invoiceSheet.getCell("A1").alignment = { horizontal: "center" };
+
+        invoiceSheet.getCell("A2").value = `${monthName}, ${year}`;
+        invoiceSheet.getCell("B2").value = "Details";
+
+        // Allowed projects
+        const allowedProjects = currentSelectedRegion
+          ? (regionProjects[currentSelectedRegion] || []).map((p) =>
+              p.trim().toLowerCase()
+            )
+          : [];
+
+        const displayedUsers = users.map((user) => {
+          const rawName = (user.userInfo.name || "")
+            .replace(/[\w.-]+@[\w.-]+\.\w+/g, "")
+            .trim();
+
+          let totalUtilizedHours = 0;
+          const workingDays = new Set();
+
+          (user.entries || []).forEach((entry) => {
+            const entryProject = (entry.project || "").trim().toLowerCase();
+            if (
+              allowedProjects.length > 0 &&
+              !allowedProjects.includes(entryProject)
+            )
+              return;
+
+            const rawDate = entry.date;
+            if (!rawDate) return;
+            const entryDate = new Date(rawDate);
+            if (isNaN(entryDate)) return;
+
+            const formattedDate = formatDate(entryDate);
+            if (!dateArray.includes(formattedDate)) return;
+
+            const util = parseFloat(entry.utilizedHour || 0);
+            if (util > 0) {
+              totalUtilizedHours += util;
+              workingDays.add(formattedDate);
+            }
+          });
+
+          return {
+            name: rawName,
+            availableHours: workingDays.size * 8,
+            utilizedHours: totalUtilizedHours,
+            workingDays: workingDays.size,
+            onsiteHours: 0,
+            onsiteDays: 0,
+          };
+        });
+
+        // Header row
+        displayedUsers.forEach((user, index) => {
+          const col = 3 + index;
+          const cell = invoiceSheet.getRow(2).getCell(col);
+          cell.value = user.name;
+          cell.alignment = { horizontal: "center" };
+          cell.font = { bold: true };
+        });
+
+        // Data rows (no total column)
+        const rows = [
+          [
+            "Off-site",
+            "Working Hours Available",
+            ...displayedUsers.map((u) => u.availableHours),
+          ],
+          [
+            "",
+            "Working Hours Utilised",
+            ...displayedUsers.map((u) => u.utilizedHours),
+          ],
+          [
+            "",
+            "No of Working Days",
+            ...displayedUsers.map((u) => u.workingDays),
+          ],
+          [
+            "On-site",
+            "Available Hours Onsite",
+            ...displayedUsers.map((u) => u.onsiteHours),
+          ],
+          [
+            "",
+            "Working Hours Onsite",
+            ...displayedUsers.map((u) => u.onsiteHours),
+          ],
+          [
+            "",
+            "Total No of Working Days (Onsite)",
+            ...displayedUsers.map((u) => u.onsiteDays),
+          ],
+        ];
+
+        let rowIdx = 3;
+        for (const rowData of rows) {
+          const row = invoiceSheet.getRow(rowIdx++);
+          row.getCell(1).value = rowData[0];
+          row.getCell(2).value = rowData[1];
+
+          for (let j = 0; j < displayedUsers.length; j++) {
+            const val = rowData[2 + j] ?? "";
+            const cell = row.getCell(j + 3);
+            cell.value = val;
+
+            if (typeof val === "number" || !isNaN(val)) {
+              cell.numFmt = val % 1 !== 0 ? "0.0" : "0";
+            }
+
+            // Fill only first 3 rows with light background
+            if (rowIdx <= 6) {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFFDD0" },
+              };
+            }
+          }
+
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          });
+        }
+
+        // Summary calculations
+        const totalBillableHours = displayedUsers.reduce(
+          (s, u) => s + u.utilizedHours,
+          0
+        );
+        const totalWorkingDays = displayedUsers.reduce(
+          (s, u) => s + u.workingDays,
+          0
+        );
+        const allowanceRate = 1.0;
+        const totalAllowance = totalWorkingDays * allowanceRate;
+        const technicalFee = totalBillableHours * 1;
+
+        let summaryRows = [];
+        if (currentSelectedRegion === "Erdweg") {
+          summaryRows = [
+            ["Total Billable Hours", totalBillableHours.toFixed(1)],
+            ["Technical Fee (USD/hr)@1/hr", `€${technicalFee.toFixed(2)}`],
+            ["Total Working Days Onsite", 0],
+            ["Allowance / day", `€${allowanceRate.toFixed(2)}`],
+            ["Flight Ticket", "€0.00"],
+            ["Additional Expenses (if any) Euro", "€0.00"],
+            [
+              "Total Invoice Value (Euro)",
+              `€${(technicalFee + totalAllowance).toFixed(2)}`,
+            ],
+            ["Ex. rate (Euro-INR)", ""],
+            ["Total Invoice Value (INR)", ""],
+            ["Revised Invoice Value with Tax", ""],
+          ];
+        } else if (currentSelectedRegion === "Italy") {
+          summaryRows = [
+            ["Flight Ticket", "€0.00"],
+            ["Transport", "€0.00"],
+            ["Apartment Expense", "€0.00"],
+            [
+              "Additional Expenses (Visiting Nevers, Erdweg, MTCE, USA)",
+              "€0.00",
+            ],
+            ["Total Invoice Value (USD)", `€${technicalFee.toFixed(2)}`],
+            ["Ex. rate (USD-INR)", ""],
+            ["Total Invoice Value (INR)", ""],
+            ["Revised Invoice Value with Tax", ""],
+          ];
+        } else {
+          summaryRows = [
+            ["Total Billable Hours", totalBillableHours.toFixed(1)],
+            ["Technical Fee (USD/hr)@1/hr", `€${technicalFee.toFixed(2)}`],
+            ["Total Working Days Onsite", 0],
+            ["Allowance / day", `€${allowanceRate.toFixed(2)}`],
+            ["Flight Ticket", "€0.00"],
+            ["Additional Expenses (if any) Euro", "€0.00"],
+            [
+              "Total Invoice Value (Euro)",
+              `€${(technicalFee + totalAllowance).toFixed(2)}`,
+            ],
+            ["Ex. rate (Euro-INR)", ""],
+            ["Total Invoice Value (INR)", ""],
+            ["Revised Invoice Value with Tax", ""],
+          ];
+        }
+
+        const lastUserCol = 2 + displayedUsers.length;
+
+        for (const [label, value] of summaryRows) {
+          const row = invoiceSheet.getRow(rowIdx++);
+          row.getCell(2).value = label;
+          row.getCell(lastUserCol).value = value;
+          row.getCell(lastUserCol).alignment = { horizontal: "right" };
+        }
+
+        // Final column width styling
+        invoiceSheet.columns.forEach((col, i) => {
+          col.width = i === 1 ? 25 : 10;
+          col.alignment = { horizontal: "center", vertical: "center" };
+        });
+        invoiceSheet.getColumn(2).alignment = { horizontal: "left" };
+      }
+
+      function formatDate(date) {
+        const d = new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Requests Index</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f6fa;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #007bff;
+        color: white;
+        position: sticky;
+        top: 0;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      .accepted {
+        background-color: #d4edda;
+      }
+      .rejected {
+        background-color: #f8d7da;
+      }
+      .pending {
+        background-color: #fff3cd;
+      }
+      .filters {
+        margin-bottom: 15px;
+      }
+      .filters button {
+        background: #ddd;
+        border: none;
+        padding: 8px 12px;
+        margin-right: 6px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .filters button.active {
+        background: #007bff;
+        color: white;
+      }
+      .search-box {
+        margin-bottom: 15px;
+      }
+      .search-box input {
+        padding: 8px;
+        width: 300px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+
+      .inwork {
+        background-color: #007bff;
+      }
+      .completed {
+        background-color: #e2e3e5;
+      }
+
+      .complete-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .complete-btn:hover {
+        background: #218838;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 5px;
+      }
+      .feedback-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .feedback-btn:hover {
+        background: #138496;
+      }
+      .feedback-textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      .submit-feedback {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 5px;
+      }
+      .back-btn {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 8px 16px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+      }
+
+      .back-btn:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="back-btn" onclick="window.history.back()">
+      ← Back to Dashboard
+    </button>
+
+    <div class="container">
+      <h1>Requests Index</h1>
+
+      <div class="filters">
+        <button onclick="filterStatus('all')" class="active">All</button>
+        <button onclick="filterStatus('Accepted')">In work</button>
+        <button onclick="filterStatus('Rejected')">Rejected</button>
+        <button onclick="filterStatus('Completed')">Completed</button>
+        <button onclick="filterStatus('Closed')">Closed</button>
+        <button onclick="filterStatus('Approved')">Approved</button>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search requests..."
+          oninput="searchRequests()"
+        />
+      </div>
+
+      <table id="requestsTable">
+        <thead>
+          <tr>
+            <th>Sr. No.</th>
+            <th>Request No.</th>
+            <th>Project</th>
+            <th>Requestor</th>
+            <th>Site</th>
+            <th>Request Type</th>
+            <th>Request Date</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Accepted/Rejected</th>
+            <th>Delegated Completed</th>
+            <th>MadeBy Completed/Feedback</th>
+          </tr>
+        </thead>
+        <tbody id="requestsBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      let allRequests = [];
+
+      async function loadRequests() {
+        try {
+          const res = await fetch("http://localhost:3000/api/forms-report");
+          const { data } = await res.json();
+          allRequests = data || [];
+          renderRequests(allRequests);
+        } catch (error) {
+          console.error("Error loading requests:", error);
+          document.getElementById("requestsBody").innerHTML = `
+            <tr>
+              <td colspan="11" style="text-align: center; color: red;">
+                Error loading requests. Please try again later.
+              </td>
+            </tr>
+          `;
+        }
+      }
+      function renderRequests(requests) {
+        const tbody = document.getElementById("requestsBody");
+        tbody.innerHTML = "";
+
+        if (requests.length === 0) {
+          tbody.innerHTML = `
+      <tr>
+        <td colspan="12" style="text-align: center;">
+          No requests found.
+        </td>
+      </tr>
+    `;
+          return;
+        }
+
+        requests.forEach((request, index) => {
+          const tr = document.createElement("tr");
+          // Add status-based classes
+          if (request.status === "Accepted") tr.classList.add("accepted");
+          else if (request.status === "Rejected") tr.classList.add("rejected");
+          else if (request.status === "In Work") tr.classList.add("inwork");
+          else if (request.status === "Completed")
+            tr.classList.add("completed");
+          else if (request.status === "Closed") tr.classList.add("closed");
+
+          const feedbackId = `feedback-${request._id}`;
+
+          tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>
+  <a href="http://localhost:3000/view-form/${
+    request.requestId
+  }" target="_blank" style="text-decoration: underline; color: blue;">
+    ${request.requestId || "-"}
+  </a>
+</td>
+
+      <td>${request.project || "-"}</td>
+      <td>${request.requestor || "-"}</td>
+      <td>${request.site || "-"}</td>
+      <td>${request.requestType || "-"}</td>
+      <td>${request.requestDate || "-"}</td>
+      <td>${request.dueDate || "-"}</td>
+      <td>${request.status || "Pending"}</td>
+      <td>${request.delegateTo || "-"}</td>
+      <td>
+        ${
+          request.status === "In Work" || request.status === "Accepted"
+            ? `<button class="complete-btn" onclick="markAsCompleted('${request._id}')">Mark Complete</button>`
+            : request.status === "Completed"
+            ? "Completed"
+            : request.status === "Closed"
+            ? "Closed"
+            : "-"
+        }
+      </td>
+      <td>
+        ${
+          request.status === "Completed"
+            ? `<div class="action-buttons">
+              <button class="complete-btn" onclick="finalComplete('${request._id}')">Close</button>
+              <button class="feedback-btn" onclick="showFeedback('${feedbackId}')">Feedback</button>
+              <div id="${feedbackId}" style="display:none;">
+                <textarea class="feedback-textarea" placeholder="Enter your feedback..."></textarea>
+                <button class="submit-feedback" onclick="submitFeedback('${request._id}', '${feedbackId}')">Submit</button>
+              </div>
+            </div>`
+            : request.status === "Closed"
+            ? request.feedback
+              ? "Feedback Provided"
+              : "Closed"
+            : "-"
+        }
+      </td>
+    `;
+
+          tbody.appendChild(tr);
+        });
+      }
+      function showFeedback(feedbackId) {
+        const feedbackDiv = document.getElementById(feedbackId);
+        feedbackDiv.style.display =
+          feedbackDiv.style.display === "none" ? "block" : "none";
+      }
+
+      async function submitFeedback(requestId, feedbackId) {
+        const feedbackText = document.querySelector(
+          `#${feedbackId} textarea`
+        ).value;
+        if (!feedbackText.trim()) {
+          alert("Please enter feedback before submitting");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/submit-feedback/${requestId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ feedback: feedbackText }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            alert("Feedback submitted successfully!");
+            document.querySelector(`#${feedbackId} textarea`).value = "";
+            document.getElementById(feedbackId).style.display = "none";
+            await loadRequests(); // Refresh the list
+          } else {
+            throw new Error(result.error || "Unknown error");
+          }
+        } catch (err) {
+          console.error("Failed to submit feedback:", err);
+          alert("Error submitting feedback: " + err.message);
+        }
+      }
+
+      async function finalComplete(requestId) {
+        if (!confirm("Are you sure you want to close this request?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/final-complete/${requestId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            alert("Request closed successfully!");
+            await loadRequests(); // Refresh the list
+          } else {
+            throw new Error(result.error || "Unknown error");
+          }
+        } catch (err) {
+          console.error("Failed to close request:", err);
+          alert("Error closing request: " + err.message);
+        }
+      }
+
+      async function submitFeedback(requestId, feedbackId) {
+        const feedbackText = document.querySelector(
+          `#${feedbackId} textarea`
+        ).value;
+        if (!feedbackText.trim()) {
+          alert("Please enter feedback before submitting");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/submit-feedback/${requestId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ feedback: feedbackText }),
+            }
+          );
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(
+              result.error || `HTTP error! status: ${response.status}`
+            );
+          }
+
+          if (result.success) {
+            alert("Feedback submitted successfully!");
+            document.querySelector(`#${feedbackId} textarea`).value = "";
+            document.getElementById(feedbackId).style.display = "none";
+            await loadRequests(); // Refresh the list
+          }
+        } catch (err) {
+          console.error("Failed to submit feedback:", err);
+          alert("Error submitting feedback: " + err.message);
+        }
+      }
+      async function markAsCompleted(requestId) {
+        if (
+          !confirm("Are you sure you want to mark this request as completed?")
+        ) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/mark-completed/${requestId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            alert("Request marked as completed successfully!");
+            await loadRequests(); // Refresh the list
+          } else {
+            throw new Error(result.error || "Unknown error");
+          }
+        } catch (err) {
+          console.error("Failed to update task status:", err);
+          alert("Error marking as completed: " + err.message);
+        }
+      }
+      function filterStatus(status) {
+        // Update active filter button
+        document.querySelectorAll(".filters button").forEach((btn) => {
+          btn.classList.remove("active");
+          if (
+            (status === "all" && btn.textContent === "All") ||
+            btn.textContent === status
+          ) {
+            btn.classList.add("active");
+          }
+        });
+
+        const filtered =
+          status === "all"
+            ? allRequests
+            : allRequests.filter((req) =>
+                status === "Pending"
+                  ? !req.status || req.status === "Pending"
+                  : req.status === status
+              );
+
+        renderRequests(filtered);
+      }
+
+      function searchRequests() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const filtered = allRequests.filter((req) =>
+          Object.values(req).some((value) =>
+            String(value).toLowerCase().includes(searchTerm)
+          )
+        );
+        renderRequests(filtered);
+      }
+
+      window.onload = loadRequests;
+    </script>
+  </body>
+</html>
