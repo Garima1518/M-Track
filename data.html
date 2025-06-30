@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Management Information System</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link rel="stylesheet" href="public/css/data.css" type="text/css" />
+    <!-- Select2 CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- jQuery (Required for Select2) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  </head>
+  <style>
+    :root {
+      --primary: #3a86ff;
+      --primary-dark: #2667cc;
+      --secondary: #030303;
+      --accent: #ff006e;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --success: #06d6a0;
+      --error: #ef476f;
+      --warning: #ffd166;
+      --info: #118ab2;
+      --glass: rgba(255, 255, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.2);
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Modern Body with Animated Gradient */
+    body {
+      font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: var(--dark);
+      background: linear-gradient(-45deg, #e1e5e9, #9ba7b1, #d1dbe5, #b8c2cc);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Floating Particles Background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(
+          circle at 20% 30%,
+          rgba(255, 255, 255, 0.1) 1px,
+          transparent 1px
+        ),
+        radial-gradient(
+          circle at 80% 70%,
+          rgba(255, 255, 255, 0.1) 1px,
+          transparent 1px
+        );
+      background-size: 100px 100px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Ultra-Modern Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(42, 122, 197, 0.9);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      border-bottom: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      padding: 0.5rem 2rem;
+      background: rgba(42, 122, 197, 0.95);
+    }
+
+    .navbar .logo {
+      height: 50px;
+      width: auto;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 12px;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+    }
+
+    .navbar .logo:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      border-radius: 50px;
+      position: relative;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .nav-links a::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transform: translateX(-100%);
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .nav-links a:hover::before {
+      transform: translateX(100%);
+    }
+
+    /* Main Container with Glass Morphism */
+    .container {
+      width: 95%;
+      max-width: 1800px;
+      margin: 6rem auto 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      transition: var(--transition);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle,
+        rgba(58, 134, 255, 0.1) 0%,
+        transparent 70%
+      );
+      animation: rotate 20s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Headings with Gradient Text */
+    h1,
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    h1::after,
+    h2::after {
+      content: "";
+      display: block;
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      margin: 1rem auto;
+      border-radius: 2px;
+    }
+
+    /* Modern Table Design */
+    table,
+    #reportTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 2rem 0;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+    }
+
+    #reportTable:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    th,
+    td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    th {
+      background: linear-gradient(
+        to right,
+        var(--primary),
+        var(--primary-dark)
+      );
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(58, 134, 255, 0.03);
+    }
+
+    tr:hover {
+      background-color: rgba(58, 134, 255, 0.1);
+      transform: scale(1.005);
+    }
+
+    /* Form Elements */
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      font-family: "Poppins", sans-serif;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+    }
+
+    /* Specific Column Widths */
+    #project {
+      width: 40px;
+    }
+    #mode {
+      width: 80px;
+    }
+    #desc {
+      min-width: 200px;
+    }
+    #code,
+    #j {
+      width: 70px;
+    }
+    #date {
+      width: 130px;
+    }
+    #status {
+      width: 120px;
+    }
+    #hr,
+    input.utilized-hours {
+      width: 70px !important;
+    }
+
+    /* Buttons with Hover Effects */
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      z-index: -1;
+      transition: var(--transition);
+      opacity: 1;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .button:hover::before {
+      opacity: 0.9;
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    #submitButton {
+      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+      color: white;
+      margin: 2rem auto;
+      display: block;
+      font-size: 1.1rem;
+      padding: 1rem 2.5rem;
+    }
+
+    #submitButton:hover {
+      background: linear-gradient(45deg, var(--primary-dark), var(--secondary));
+    }
+
+    /* Add/Remove Buttons */
+    .add-remove-container {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .add-button,
+    .remove-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      border: none;
+      color: white;
+    }
+
+    .add-button {
+      background: linear-gradient(45deg, var(--success), #06b48a);
+    }
+
+    .remove-button {
+      background: linear-gradient(45deg, var(--error), #d43a5f);
+    }
+
+    .add-button:hover,
+    .remove-button:hover {
+      transform: scale(1.1) translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .add-button:active,
+    .remove-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Enhanced Popup */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      overflow: auto;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .popup.show {
+      opacity: 1;
+    }
+
+    .popup-content {
+      position: relative;
+      margin: 5% auto;
+      width: 90%;
+      max-width: 1400px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+      transform: translateY(20px);
+      transition: transform 0.4s ease;
+    }
+
+    .popup.show .popup-content {
+      transform: translateY(0);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(45deg, var(--error), #d43a5f);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: var(--transition);
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .close-btn:hover {
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Image Gallery with Smooth Scrolling */
+    .image-container {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 2rem;
+      gap: 1.5rem;
+      scroll-snap-type: x mandatory;
+    }
+
+    .image-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .image-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+
+    .image-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 4px;
+    }
+
+    .image-container img {
+      max-height: 80vh;
+      width: auto;
+      object-fit: contain;
+      scroll-snap-align: center;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+
+    .image-container img:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* Chatbot Styles */
+    .navbar-gif {
+      width: 80px;
+      height: 80px;
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      cursor: pointer;
+      z-index: 1000;
+      border-radius: 50%;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      border: 3px solid white;
+    }
+
+    .navbar-gif:hover {
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .chatbot-popup {
+      position: fixed;
+      bottom: 5rem;
+      right: 2rem;
+      width: 350px;
+      height: 500px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .chatbot-popup.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-close {
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .chatbot-close:hover {
+      transform: rotate(90deg);
+    }
+
+    .chatbot-frame {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Custom Alert System */
+    .custom-alert {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 1.2rem 2.5rem;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: 90%;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .custom-alert.show {
+      opacity: 1;
+      bottom: 2rem;
+    }
+
+    .custom-alert.success {
+      background: linear-gradient(
+        135deg,
+        rgba(6, 214, 160, 0.9),
+        rgba(5, 180, 138, 0.9)
+      );
+    }
+
+    .custom-alert.warning {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 209, 102, 0.9),
+        rgba(255, 183, 3, 0.9)
+      );
+      color: var(--dark);
+    }
+
+    .custom-alert.error {
+      background: linear-gradient(
+        135deg,
+        rgba(239, 71, 111, 0.9),
+        rgba(216, 43, 86, 0.9)
+      );
+    }
+
+    .custom-alert.info {
+      background: linear-gradient(
+        135deg,
+        rgba(17, 138, 178, 0.9),
+        rgba(9, 109, 141, 0.9)
+      );
+    }
+
+    .custom-alert::before {
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .custom-alert.success::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7' /%3E%3C/svg%3E");
+    }
+
+    .custom-alert.error::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12' /%3E%3C/svg%3E");
+    }
+
+    .custom-alert.warning::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231a1a2e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' /%3E%3C/svg%3E");
+    }
+
+    .custom-alert.info::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E");
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .container {
+        width: 98%;
+        padding: 1.5rem;
+        margin: 5rem auto 1rem;
+      }
+
+      .nav-links {
+        gap: 0.8rem;
+      }
+
+      .nav-links a {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .nav-links {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .container {
+        padding: 1.2rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .chatbot-popup {
+        width: 300px;
+        height: 450px;
+        right: 1rem;
+      }
+
+      .navbar-gif {
+        width: 60px;
+        height: 60px;
+        right: 1rem;
+        bottom: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 4.5rem auto 1rem;
+      }
+
+      .nav-links a {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      #submitButton {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .custom-alert {
+        font-size: 0.9rem;
+        padding: 1rem 1.5rem;
+      }
+    }
+    /* Expandable scrollable container */
+    .expandable-container {
+      margin: 1rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .expand-button {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .expand-button:hover {
+      background: var(--primary-dark);
+    }
+
+    .plus-icon {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .expandable-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      background: white;
+    }
+
+    .expandable-content.expanded {
+      max-height: 400px; /* Adjust height as needed */
+    }
+
+    .scrollable-content {
+      padding: 1rem;
+      max-height: 400px; /* Same as expanded max-height */
+      overflow-y: auto;
+    }
+
+    /* Custom scrollbar for the content */
+    .scrollable-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Rotate plus icon when expanded */
+    .expand-button.expanded .plus-icon {
+      transform: rotate(45deg);
+    }
+  </style>
+
+  <body>
+    <div class="navbar">
+      <a href="#">
+        <img
+          src="public/img/minebeamitsumi.png"
+          alt="Company Logo"
+          class="logo"
+        />
+      </a>
+
+      <div class="nav-links">
+        <a href="data.html">Home</a>
+        <a href="dailySheet.html">Daily Task</a>
+        <a href="timeSheet.html">Time Sheet</a>
+        <a
+          href="public/img/combined.png"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Code</a
+        >
+        <a href="#" onclick="logout()" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+
+    <div id="imagePopup" class="popup">
+      <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">×</span>
+        <div class="image-container">
+          <img src="public/img/combined.png" alt="Code Image" />>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Welcome, <span id="displayName"></span></h2>
+
+      <div class="table-responsive">
+        <table id="reportTable">
+          <tr>
+            <th>Project</th>
+            <th>Mode</th>
+            <th>Date</th>
+            <th>Shift Time</th>
+            <th>Description</th>
+            <th>Code</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Tool Used</th>
+            <th>J/I</th>
+            <th>Utilized Hr</th>
+            <th>Remarks</th>
+          </tr>
+          <tr id="firstRow">
+            <td>
+              <select id="project">
+                <optgroup label="Software Projects">
+                  <option value="DevOps and Tools">DevOps and Tools</option>
+                  <option value="UBSW Project">UBSW Project</option>
+                  <option value="DigiKey">DigiKey</option>
+                  <option value="E- Mirror OB">E- Mirror OB</option>
+                  <option value="NFC">NFC</option>
+                  <option value="E- Mirror QT GUI">E- Mirror QT GUI</option>
+                  <option value="J34X_HC">J34X_HC</option>
+                  <option value="BSW">BSW</option>
+                  <option value="J4U">J4U</option>
+                  <option value="Mobile Access-eDoor">
+                    Mobile Access-eDoor
+                  </option>
+                  <option value="AutoSAR- UA">AutoSAR- UA</option>
+                  <option value="AutoSAR- MAE">AutoSAR- MAE</option>
+                  <option value="SW Competence-UA">SW Competence-UA</option>
+                  <option value="BMW-XNF">BMW-XNF</option>
+                  <option value="E-mirror">E-mirror</option>
+                  <option value="5K45_HC">5K45_HC</option>
+                  <option value="VK00-HC">VK00-HC</option>
+                  <option value="Audi e-Ring">Audi e-Ring</option>
+                  <option value="5K45_HC_REAR">5K45_HC_REAR</option>
+                  <option value="5K45_HC_Front">5K45_HC_Front</option>
+                  <option value="Data Analytics">Data Analytics</option>
+                </optgroup>
+
+                <optgroup label="Mechanical Projects">
+                  <option value="CAE-Japan">CAE-Japan</option>
+                  <option value="CAE">CAE</option>
+                  <option value="Flush Handle Support to Italy">
+                    Flush Handle Support to Italy
+                  </option>
+                  <option value="Support To Erdweg">Support To Erdweg</option>
+                  <option value="DEP">DEP</option>
+                  <option value="Audi E-Wing">Audi E-Wing</option>
+                  <option value="Mahindra Demo vehicle">
+                    Mahindra Demo vehicle
+                  </option>
+                  <option value="Power Rotative Door">
+                    Power Rotative Door
+                  </option>
+                  <option value="Handle Competence -UA">
+                    Handle Competence -UA
+                  </option>
+                  <option value="C70 St Switch">C70 St Switch</option>
+                  <option value="MAZDA CX5 - Demo Car">
+                    MAZDA CX5 - Demo Car
+                  </option>
+                  <option value="ID5 - Demo Car">ID5 - Demo Car</option>
+                  <option value="Motorized  E-wing">Motorized E-wing</option>
+                  <option value="RSA 15-40">RSA 15-40</option>
+                  <option value="FCA 356">FCA 356</option>
+                  <option value="FRONT FLUSH">FRONT FLUSH</option>
+                  <option value="PSA E-FLUSH LP3">PSA E-FLUSH LP3</option>
+                  <option value="PSA-D34">PSA-D34</option>
+                  <option value="PSA-D-CROSS REAR">PSA-D-CROSS REAR</option>
+                  <option value="BMW wing handle">BMW wing handle</option>
+                  <option value="RR 45">RR 45</option>
+                  <option value="VW Handle">VW Handle</option>
+                  <option value="Scout Handle">Scout Handle</option>
+                  <option value=" Mazda J17C">Mazda J17C</option>
+                  <option value="P56_LD101">P56_LD101</option>
+                  <option value=" 12P_LD101">12P_LD101</option>
+                </optgroup>
+
+                <optgroup label="Internal">
+                  <option value="Catia Training">Catia Training</option>
+                  <option value="ISO/Quality Systems">
+                    ISO/Quality Systems
+                  </option>
+                  <option value="Marketing - Business Management/Integration">
+                    Marketing - Business Management/Integration
+                  </option>
+                  <option value="Functional Safety Related Activity">
+                    Functional Safety Related Activity
+                  </option>
+                  <option value="Cyber-Security Related Activity">
+                    Cyber-Security Related Activity
+                  </option>
+                  <option value="IATF and ISO Certification">
+                    IATF and ISO Certification
+                  </option>
+                  <option value="Management">Management</option>
+                  <option value="Patent Search">Patent Search</option>
+                  <option value="Each System Management">
+                    Each System Management
+                  </option>
+                  <option value="Various Management/General Affairs">
+                    Various Management/General Affairs
+                  </option>
+                  <option value="Common Engine">Common Engine</option>
+                  <option value="Software UA">Software UA</option>
+                  <option value="Software MAE">Software MAE</option>
+                </optgroup>
+              </select>
+            </td>
+
+            <td>
+              <select id="mode">
+                <option value="WFO">WFO</option>
+                <option value="WFH">WFH</option>
+                <option value="Leave">Leave</option>
+                <option value="Company Holiday">Company Holiday</option>
+              </select>
+            </td>
+            <td><input type="date" id="date" /></td>
+
+            <td>
+              <select>
+                <option value="IST">IST</option>
+                <option value="CET">CET</option>
+                <option value="SPL">SPL</option>
+                <option value="JST">JST</option>
+              </select>
+            </td>
+            <td>
+              <input
+                type="text"
+                placeholder="Description"
+                list="desc-suggestions-kc9yezt9"
+                style="width: 90%; height: 30px; transition: width 0.3s ease"
+                onfocus="this.style.width='300px';"
+                onblur="this.style.width='90%';"
+                maxlength="60"
+                id="desc-input"
+              />
+              <small id="char-count" style="color: #666">60 left</small>
+            </td>
+
+            <td>
+              <select id="code">
+                <option value="1A">1A</option>
+                <option value="1B">1B</option>
+                <option value="1C">1C</option>
+                <option value="2A">2A</option>
+                <option value="2B">2B</option>
+                <option value="2C">2C</option>
+                <option value="2D">2D</option>
+                <option value="2E">2E</option>
+                <option value="2F">2F</option>
+                <option value="2G">2G</option>
+                <option value="2H">2H</option>
+                <option value="2I">2I</option>
+                <option value="2J">2J</option>
+                <option value="3A">3A</option>
+                <option value="3B">3B</option>
+                <option value="3C">3C</option>
+                <option value="3D">3D</option>
+                <option value="3E">3E</option>
+                <option value="3F">3F</option>
+                <option value="3G">3G</option>
+                <option value="3H">3H</option>
+                <option value="3I">3I</option>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="4C">4C</option>
+                <option value="4D">4D</option>
+                <option value="4E">4E</option>
+                <option value="4F">4F</option>
+                <option value="5A">5A</option>
+                <option value="6A">6A</option>
+                <option value="6B">6B</option>
+                <option value="6C">6C</option>
+                <option value="6D">6D</option>
+                <option value="6E">6E</option>
+                <option value="6F">6F</option>
+                <option value="6G">6G</option>
+                <option value="6H">6H</option>
+                <option value="7A">7A</option>
+                <option value="7B">7B</option>
+                <option value="7C">7C</option>
+                <option value="7D">7D</option>
+                <option value="7E">7E</option>
+                <option value="7F">7F</option>
+                <option value="8A">8A</option>
+                <option value="8B">8B</option>
+                <option value="8C">8C</option>
+                <option value="8D">8D</option>
+                <option value="8E">8E</option>
+                <option value="8F">8F</option>
+                <option value="8G">8G</option>
+              </select>
+            </td>
+            <td>
+              <select id="status">
+                <option value="On Time">On Time</option>
+                <option value="Completed">Completed</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Blocked">Blocked</option>
+              </select>
+            </td>
+            <td><input type="date" id="dueDate" /></td>
+
+            <td>
+              <div class="select2-wrapper"></div>
+              <select class="tool-select" multiple style="width: 100%">
+                <option value="CANOE">CANOE</option>
+                <option value="Dev. Conf.">Dev. Conf.</option>
+                <option value="Excel">Excel</option>
+                <option value="Tessy">Tessy</option>
+                <option value="CB">CB</option>
+                <option value="Git">Git</option>
+                <option value="VS Code">VS Code</option>
+                <option value="Enovia">Enovia</option>
+                <option value="Catia">Catia</option>
+                <option value="CAE">Cae</option>
+                <option value="CS+">CS+</option>
+                <option value="MPLAB">MPLAB</option>
+                <option value="Hyperworks">Hyperworks</option>
+                <option value="Hypermesh">Hypermesh</option>
+                <option value="Physics AI">Physics AI</option>
+                <option value="Google Meet">Google Meet</option>
+              </select>
+            </td>
+
+            <td>
+              <select id="j">
+                <option value="JA">JA</option>
+                <option value="JB">JB</option>
+                <option value="JC">JC</option>
+              </select>
+            </td>
+            <td>
+              <input
+                type="number"
+                placeholder="hour"
+                id="hr"
+                class="utilized-hours"
+                min="0.5"
+                max="8"
+                step="0.5"
+                oninput="strictHourInput(this)"
+              />
+            </td>
+
+            <td>
+              <textarea
+                placeholder="Remarks"
+                style="
+                  width: 90%;
+                  height: 30px;
+                  resize: none;
+                  overflow-y: auto;
+                  transition: width 0.3s ease;
+                "
+                onfocus="this.style.width='300px';"
+                onblur="this.style.width='90%';"
+              ></textarea>
+            </td>
+          </tr>
+        </table>
+
+        <div class="tool-container-right">
+          <button onclick="addRow()" class="tool-btn plus-btn">+</button>
+          <button onclick="removeLastRow()" class="tool-btn minus-btn">
+            −
+          </button>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px">
+        <button
+          id="submitButton"
+          class="btn-hover color-9"
+          onclick="submitReport()"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+    <!-- Chatbot popup container -->
+    <!-- <div id="chatbotContainer" class="chatbot-popup" style="display: none">
+      <div class="chatbot-header">
+        <span>Chat Assistant</span>
+        <span class="chatbot-close" onclick="toggleChatbot()">×</span>
+      </div>
+      <iframe
+        src="/chatbot_project/chatbot-frontend/public/index.html"
+        frameborder="0"
+        class="chatbot-frame"
+      ></iframe>
+    </div>
+    <div style="position: relative; display: inline-block">
+      <img
+        src="/chatbot_project/chatbot-frontend/public/robot.gif"
+        alt="Chatbot"
+        class="navbar-gif"
+        onclick="showMessage(); window.open('http://172.16.101.146:3002/', '_blank')"
+      />
+      <div
+        id="chatbotMessage"
+        style="
+          display: none;
+          position: absolute;
+          bottom: 80px;
+          left: 0;
+          background: #fff;
+          padding: 5px 10px;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+          font-size: 14px;
+        "
+      >
+        Hello, how can I help you?
+      </div>
+    </div> -->
+    <script>
+      function addRow() {
+        const table = document.getElementById("reportTable");
+        const firstRow = document.getElementById("firstRow");
+        const newRow = firstRow.cloneNode(true);
+
+        // Update all IDs inside the cloned row to avoid duplicates
+        const elements = newRow.querySelectorAll("input, select, textarea");
+        elements.forEach((el) => {
+          if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+            el.value = el.value; // clone the current value
+          }
+        });
+
+        newRow.removeAttribute("id"); // remove id to prevent multiple same IDs
+        table.appendChild(newRow);
+      }
+
+      function removeRow() {
+        const table = document.getElementById("reportTable");
+        if (table.rows.length > 2) {
+          table.deleteRow(-1);
+        } else {
+          alert("At least one row must remain.");
+        }
+      }
+
+      function strictHourInput(input) {
+        let value = parseFloat(input.value);
+        if (value > 8) input.value = 8;
+        else if (value < 0.5) input.value = 0.5;
+        else input.value = (Math.round(value * 2) / 2).toFixed(1);
+      }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="public/js/data.js"></script>
+    <script>
+      $(document).ready(function () {
+        function initializeToolUsedSelect() {
+          $(".tool-used").select2({
+            placeholder: "Select Tools",
+            allowClear: true,
+            width: "100%",
+            tags: true,
+            createTag: function (params) {
+              var term = $.trim(params.term);
+              if (term === "") return null;
+              return {
+                id: term,
+                text: term,
+                newTag: true,
+              };
+            },
+          });
+        }
+
+        initializeToolUsedSelect();
+
+        $("#addRowBtn").click(function () {
+          var newRow = $("#reportTable tbody tr:last").clone();
+
+          newRow.find("input, select").val("");
+
+          newRow.find(".tool-used").each(function () {
+            $(this).select2("destroy");
+          });
+
+          newRow
+            .find(".tool-used")
+            .removeAttr("data-select2-id")
+            .removeClass("select2-hidden-accessible")
+            .next(".select2")
+            .remove();
+
+          $("#reportTable tbody").append(newRow);
+          initializeToolUsedSelect();
+        });
+      });
+
+      function strictHourInput(input) {
+        const val = parseFloat(input.value);
+
+        if (input.value === "") return;
+
+        const allowed = [
+          0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8,
+        ];
+
+        if (!allowed.includes(val)) {
+          input.value = "";
+        }
+      }
+
+      function showMessage() {
+        const message = document.getElementById("chatbotMessage");
+        message.style.display = "block";
+        setTimeout(() => {
+          message.style.display = "none";
+        }, 2000);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const toolSelect = document.getElementById("toolUsed");
+        if (toolSelect) {
+          toolSelect.addEventListener("change", () => {
+            const selectedOptions = Array.from(toolSelect.selectedOptions).map(
+              (option) => option.value
+            );
+            console.log("Selected tools:", selectedOptions);
+          });
+        }
+      });
+      function logout() {
+        localStorage.clear();
+
+        window.location.href = "index.html";
+      }
+    </script>
+
+    <div id="customAlert" class="custom-alert hidden"></div>
+  </body>
+</html>

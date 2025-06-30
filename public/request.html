@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Request Form</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7fb;
+        color: #333;
+        padding: 20px;
+      }
+      #navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #007bff;
+        color: white;
+        padding: 14px 20px;
+        font-size: 18px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      #navbar button {
+        background: #28a745;
+        color: white;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      #navbar button:hover {
+        background: #218838;
+      }
+      .tab-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .tab-bar button {
+        background: #fff;
+        border: 1px solid #007bff;
+        color: #007bff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .tab-bar button.active {
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+      }
+      .form-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        font-family: "Segoe UI", sans-serif;
+        max-width: 900px; /* LIMIT WIDTH */
+        margin: 0 auto; /* CENTER ALIGN */
+      }
+
+      .form-container table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+      }
+      .form-container td {
+        padding: 8px;
+        border: 1px solid #ccc;
+      }
+      .form-container .section-header {
+        background-color: #2979ff;
+        color: white;
+        padding: 6px 10px;
+        font-weight: bold;
+        margin-top: 20px;
+        border-radius: 4px;
+      }
+      .form-container input[type="text"],
+      .form-container input[type="date"],
+      .form-container select {
+        width: 100%;
+        padding: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      .form-container .submit-btn {
+        padding: 10px 16px;
+        background: green;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .logo {
+        max-width: 100px;
+        height: auto;
+      }
+      .bold {
+        font-weight: bold;
+        background-color: #f8f9fa;
+      }
+      .title {
+        font-weight: bold;
+        text-align: center;
+      }
+      .back-btn {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 8px 16px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+      }
+
+      .back-btn:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <button onclick="window.history.back()" class="back-btn">
+      ← Back to Dashboard
+    </button>
+
+    <div id="navbar">
+      <span>M-Track Request Manager</span>
+      <button id="newRequestBtn">+ New Request</button>
+    </div>
+
+    <div class="tab-bar" id="tabs"></div>
+
+    <div id="formContainer"></div>
+
+    <script>
+      let allFormsData = [];
+      let forms = {};
+
+      document.getElementById("newRequestBtn").onclick = async () => {
+        const code = await generateNewCode();
+        createTab(code);
+        createForm(code);
+      };
+
+      function createTab(code) {
+        const tab = document.createElement("button");
+        tab.innerText = code;
+        tab.onclick = () => {
+          document
+            .querySelectorAll("#tabs button")
+            .forEach((btn) => btn.classList.remove("active"));
+          tab.classList.add("active");
+          showForm(code);
+        };
+        document.getElementById("tabs").appendChild(tab);
+      }
+
+      function showForm(code) {
+        const container = document.getElementById("formContainer");
+        container.innerHTML = "";
+        container.appendChild(forms[code]);
+      }
+
+      async function generateNewCode() {
+        const res = await fetch("http://localhost:3000/generate-code");
+        const data = await res.json();
+        return data.requestId;
+      }
+
+      function createForm(code) {
+        const form = document.createElement("form");
+        form.classList.add("form-container");
+
+        form.innerHTML = `
+        <table class="form-meta">
+          <tr>
+            <td colspan="2" rowspan="2" class="title">
+              <strong>U-Shin_QMS_General Request Form<br>(India Pvt. Ltd.)</strong>
+            </td>
+            <td rowspan="2" class="logo-cell"><img src="../img/image.png" alt="U-Shin Logo" class="logo" /></td>
+            <td class="bold">Document No:</td>
+            <td>U-Shin_QMS18007</td>
+          </tr>
+          <tr>
+            <td class="bold">Creation Date:</td>
+            <td>2018/05/16</td>
+          </tr>
+          <tr>
+            <td class="bold">Rev No.</td>
+            <td>QMS_Request_001</td>
+            <td></td>
+            <td class="bold">Created By:</td>
+            <td>JS</td>
+          </tr>
+          <tr>
+            <td colspan="3"></td>
+            <td class="bold">Last Update:</td>
+            <td>2018/05/16</td>
+          </tr>
+        </table>
+
+        <div class="section-header">TO BE FILLED BY OR ON BEHALF OF REQUESTOR :</div>
+        <table class="form-table">
+          <tr>
+            <td class="bold">DATE OF REQUEST</td>
+            <td colspan="4"><input name="requestDate" type="date" required /></td>
+          </tr>
+          <tr>
+            <td class="bold">REQUESTOR</td>
+            <td colspan="4"><input name="requestor" type="text" required /></td>
+          </tr>
+          <tr>
+            <td class="bold">REQUESTED ACTIVITY</td>
+            <td colspan="4"><input name="requestedActivity" type="text" required /></td>
+          </tr>
+          <tr>
+            <td class="bold">DUE DATE</td>
+            <td colspan="4"><input name="dueDate" type="date" required /></td>
+          </tr>
+          <tr>
+            <td class="bold">INPUTS RECEIVED</td>
+            <td colspan="4"><input name="inputsReceived" type="text" /></td>
+          </tr>
+          <tr>
+            <td class="bold">ADDITIONAL INPUTS / REFERENCE</td>
+            <td colspan="4"><input name="additionalInputs" type="text" /></td>
+          </tr>
+        </table>
+
+        <div class="section-header">TO BE FILLED BY REQUEST PROCESSING AUTHORITY :</div>
+        <table class="form-table">
+          <tr>
+            <td rowspan="3" class="bold">PROCESS</td>
+            <td><input type="checkbox" name="process" value="DESIGN PROCESS" /></td>
+            <td>DESIGN PROCESS</td>
+            <td><input type="checkbox" name="process" value="CHANGE PROCESS" /></td>
+            <td>CHANGE PROCESS</td>
+            <td><input type="checkbox" name="process" value="Automation Process" /></td>
+            <td>AUTOMATION PROCESS</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="process" value="PURCHASE PROCESS" /></td>
+            <td>PURCHASE PROCESS</td>
+            <td><input type="checkbox" name="process" value="HR PROCESS" /></td>
+            <td>HR PROCESS</td>
+            <td><input type="checkbox" name="process" value="IT PROCESS" /></td>
+            <td>IT PROCESS</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="process" value="CAE/Testing/Verification" /></td>
+            <td>CAE/Testing/Verification</td>
+            <td><input type="checkbox" name="process" value="QMS" /></td>
+            <td>QMS</td>
+            <td colspan="2"></td>
+          </tr>
+        </table>
+
+        <table class="form-table">
+          <tr>
+            <td class="bold">REQUEST NUMBER</td>
+            <td colspan="4">${code}</td>
+          </tr>
+          <tr>
+            <td class="bold">Project</td>
+            <td colspan="4"><input name="project" type="text" /></td>
+          </tr>
+          <tr>
+            <td class="bold">Site</td>
+            <td colspan="4"><input name="site" type="text" /></td>
+          </tr>
+          <tr>
+            <td class="bold">Codebeamer/Redmine/Refrence Task Link</td>
+            <td colspan="4"><input name="projectCode" type="text" /></td>
+          </tr>
+          <tr>
+            <td class="bold">EXPECTED OUTPUT</td>
+            <td colspan="4"><input name="expectedOutput" type="text" /></td>
+          </tr>
+        </table>
+
+        <table class="form-table">
+          <tr>
+            <td rowspan="6" class="bold">NEED FOR LEGAL REQUIREMENT HANDLING</td>
+            <td colspan="4" style="text-align:center; font-weight:bold;">YES</td>
+            <td><input type="checkbox" name="legalNo" /> NO</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="legalIndia" /> INDIA</td>
+            <td><input type="checkbox" name="legalOthers" /> OTHERS</td>
+            <td colspan="2"></td>
+          </tr>
+          <tr>
+            <td class="bold">REQUIREMENT</td>
+            <td>APPLICABLE</td>
+            <td>NOT APPLICABLE</td>
+            <td colspan="2"></td>
+          </tr>
+          <tr>
+            <td class="bold">REGULATORY</td>
+            <td><input type="checkbox" name="regulatoryApplicable" /></td>
+            <td><input type="checkbox" name="regulatoryNotApplicable" /></td>
+            <td colspan="2" rowspan="5"></td>
+          </tr>
+          <tr>
+            <td class="bold">COUNTRY SPECIFIC</td>
+            <td><input type="checkbox" name="countrySpecificApplicable" /></td>
+            <td><input type="checkbox" name="countrySpecificNotApplicable" /></td>
+          </tr>
+          <tr>
+            <td class="bold">MATERIAL / ROHS</td>
+            <td><input type="checkbox" name="materialApplicable" /></td>
+            <td><input type="checkbox" name="materialNotApplicable" /></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="bold">OTHERS</td>
+            <td><input type="checkbox" name="othersCheck" /></td>
+            <td><i>REASON:</i> <input type="text" name="reason"></td>
+          </tr>
+        </table>
+
+        <table class="form-table">
+          <tr>
+            <td class="bold">MADE BY:</td>
+            <td colspan="2">
+              <select name="madeBy" onchange="addCustomOption(this)">
+                <option disabled selected>Select or type name</option>
+                <option>Pracheta Verma</option>
+                <option>Garima Roy</option>
+                <option>Saizal Jarial</option>
+                <option>Akshat Aggarwal</option>
+                <option value="custom">+ Add new name</option>
+              </select>
+            </td>
+          <td class="bold">DELEGATED TO:</td>
+            <td colspan="2">
+              <select name="delegateTo" onchange="addCustomOption(this)">
+                <option disabled selected>Select or type name</option>
+                <option>Pracheta Verma</option>
+                <option>Garima Roy</option>
+                <option>Saizal Jarial</option>
+                <option>Akshat Aggarwal</option>
+                <option value="custom">+ Add new name</option>
+              </select>
+            </td>
+            <td class="bold">ACEEPTED BY:</td>
+            <td colspan="2">
+              <select name="acceptedBy" onchange="addCustomOption(this)">
+                <option disabled selected>Select or type name</option>
+              <option>Pracheta Verma</option>
+                <option>Garima Roy</option>
+                <option>Saizal Jarial</option>
+                <option>Akshat Aggarwal</option>
+                <option value="custom">+ Add new name</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+
+        <button type="submit" class="submit-btn">Submit</button>
+      `;
+
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const data = { requestId: code };
+          const formData = new FormData(form);
+          formData.forEach((v, k) => (data[k] = v));
+
+          // Check required fields
+          if (!data.madeBy || !data.delegateTo) {
+            alert(
+              "❗ Please select both 'MADE BY' and 'DELEGATED TO' before submitting."
+            );
+            return;
+          }
+
+          // Get selected processes
+          data.process = Array.from(
+            form.querySelectorAll('input[name="process"]:checked')
+          ).map((el) => el.value);
+
+          data.status = "Pending";
+
+          try {
+            const res = await fetch("http://localhost:3000/submit-form", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+            const result = await res.json();
+            alert("✅ Form submitted! ID: " + result.id);
+          } catch (err) {
+            alert("❌ Error submitting form. Check the console.");
+            console.error(err);
+          }
+        };
+
+        forms[code] = form;
+        showForm(code);
+      }
+      function handleNameChange(selectEl, type) {
+        if (selectEl.value === "add_new") {
+          const newName = prompt("Enter new name:");
+          if (
+            newName &&
+            !Array.from(selectEl.options).some((opt) => opt.text === newName)
+          ) {
+            const option = new Option(newName, newName, true, true);
+            selectEl.add(option, selectEl.options.length - 1);
+            selectEl.value = newName;
+            fetch("http://localhost:3000/api/add-name", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: newName, type }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (!data.success) alert("Error saving new name.");
+              })
+              .catch(() => alert("Server error while saving name."));
+          } else if (newName) {
+            alert("This name already exists.");
+          }
+        }
+      }
+      function addCustomOption(selectElement) {
+        if (selectElement.value === "custom") {
+          const newName = prompt("Enter new name:");
+          if (newName) {
+            const newOption = document.createElement("option");
+            newOption.value = newName;
+            newOption.textContent = newName;
+            selectElement.insertBefore(newOption, selectElement.lastChild);
+            selectElement.value = newName;
+          } else {
+            selectElement.value = "";
+          }
+        }
+      }
+
+      // Automatically create a new request when page loads
+      window.onload = async () => {
+        const code = await generateNewCode();
+        createTab(code);
+        createForm(code);
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,621 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Requests Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6fa;
+        margin: 0;
+        padding: 0;
+      }
+      .navbar {
+        background-color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        gap: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .card-button {
+        background-color: #6c63ff;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .card-button:hover {
+        background-color: #5848d6;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: #333;
+      }
+      canvas {
+        max-width: 100%;
+      }
+      #regions_div {
+        width: 100%;
+        height: 400px;
+      }
+      #timeChart {
+        width: 100%;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <button
+        class="card-button"
+        onclick="window.location.href='../public/request.html'"
+      >
+        + Request
+      </button>
+      <button
+        class="card-button"
+        onclick="window.location.href='request-index.html'"
+      >
+        Requests Index
+      </button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="title">Request Status</div>
+        <canvas id="grayDonut"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Requests by Country</div>
+        <div id="regions_div"></div>
+      </div>
+      <div class="card">
+        <div class="title">Accepted By</div>
+        <canvas id="acceptedByChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Requests by Project</div>
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Request Volume Over Time</div>
+        <div id="timeChart"></div>
+      </div>
+    </div>
+
+    <script>
+      let allRequests = [];
+
+      async function loadDashboardData() {
+        try {
+          const res = await fetch("http://localhost:3000/api/forms-report");
+          const { data } = await res.json();
+          allRequests = data || [];
+          renderCharts(allRequests);
+        } catch (err) {
+          console.error("Error loading data:", err);
+        }
+      }
+
+      function renderCharts(data) {
+        const statusCount = {},
+          siteCount = {},
+          acceptedByCount = {},
+          projectCount = {},
+          requestDateCount = {};
+
+        data.forEach((req) => {
+          statusCount[req.status || "Pending"] =
+            (statusCount[req.status || "Pending"] || 0) + 1;
+          siteCount[req.site || "Unknown"] =
+            (siteCount[req.site || "Unknown"] || 0) + 1;
+          acceptedByCount[req.acceptedBy || "Unassigned"] =
+            (acceptedByCount[req.acceptedBy || "Unassigned"] || 0) + 1;
+          projectCount[req.project || "Unassigned"] =
+            (projectCount[req.project || "Unassigned"] || 0) + 1;
+          const date = req.requestDate?.split("T")[0];
+          if (date) requestDateCount[date] = (requestDateCount[date] || 0) + 1;
+        });
+
+        renderDonutChart(statusCount);
+        renderGeoChart(siteCount);
+        renderBarChart(acceptedByCount);
+        renderRadarChart(projectCount);
+        renderTimeChart(requestDateCount);
+      }
+
+      function renderDonutChart(counts) {
+        new Chart(document.getElementById("grayDonut"), {
+          type: "doughnut",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                data: Object.values(counts),
+                backgroundColor: [
+                  "#f39c12",
+                  "#2ecc71",
+                  "#e74c3c",
+                  "#9b59b6",
+                  "#3498db",
+                ],
+              },
+            ],
+          },
+          options: {
+            cutout: "60%",
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+      }
+
+      function renderGeoChart(counts) {
+        google.charts.load("current", { packages: ["geochart"] });
+        google.charts.setOnLoadCallback(() => {
+          const rows = Object.entries(counts);
+          const dataTable = google.visualization.arrayToDataTable([
+            ["Country", "Requests"],
+            ...rows,
+          ]);
+          const options = {
+            colorAxis: { colors: ["#f4c20d", "#0f9d58"] },
+            datalessRegionColor: "#eaeaea",
+          };
+          new google.visualization.GeoChart(
+            document.getElementById("regions_div")
+          ).draw(dataTable, options);
+        });
+      }
+
+      function renderBarChart(counts) {
+        new Chart(document.getElementById("acceptedByChart"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                label: "Accepted",
+                data: Object.values(counts),
+                backgroundColor: "#36A2EB",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+          },
+        });
+      }
+
+      function renderRadarChart(counts) {
+        new Chart(document.getElementById("radarChart"), {
+          type: "radar",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                label: "Project Requests",
+                data: Object.values(counts),
+                backgroundColor: "rgba(102, 153, 255, 0.2)",
+                borderColor: "#6699ff",
+              },
+            ],
+          },
+          options: { plugins: { legend: { position: "top" } } },
+        });
+      }
+
+      function renderTimeChart(counts) {
+        const dates = Object.keys(counts).sort();
+        const values = dates.map((d) => counts[d]);
+        Plotly.newPlot(
+          "timeChart",
+          [
+            {
+              x: dates,
+              y: values,
+              type: "scatter",
+              mode: "lines+markers",
+              name: "Request Trend",
+              line: { color: "#007bff" },
+            },
+          ],
+          { xaxis: { title: "Date", type: "date" }, yaxis: { title: "Count" } }
+        );
+      }
+
+      window.onload = loadDashboardData;
+    </script>
+  </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Requests Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6fa;
+        margin: 0;
+        padding: 0;
+      }
+      .navbar {
+        background-color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        gap: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .card-button {
+        background-color: #6c63ff;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .card-button:hover {
+        background-color: #5848d6;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: #333;
+      }
+      canvas {
+        max-width: 100%;
+      }
+      #regions_div {
+        width: 100%;
+        height: 400px;
+      }
+      #timeChart {
+        width: 100%;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <button
+        class="card-button"
+        onclick="window.location.href='../public/request.html'"
+      >
+        + Request
+      </button>
+      <button
+        class="card-button"
+        onclick="window.location.href='request-index.html'"
+      >
+        Requests Index
+      </button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="title">Request Status</div>
+        <canvas id="grayDonut"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Requests by Country</div>
+        <div id="regions_div"></div>
+      </div>
+      <div class="card">
+        <div class="title">Accepted By</div>
+        <canvas id="acceptedByChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Requests by Project</div>
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Request Volume Over Time</div>
+        <div id="timeChart"></div>
+      </div>
+      <div class="card">
+        <div class="title">Made By</div>
+        <canvas id="madeByChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Request Type</div>
+        <canvas id="typeChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Monthly Request Volume</div>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="title">Request Completion Status</div>
+        <canvas id="completionChart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      let allRequests = [];
+
+      async function loadDashboardData() {
+        try {
+          const res = await fetch("http://localhost:3000/api/forms-report");
+          const { data } = await res.json();
+          allRequests = data || [];
+          renderCharts(allRequests);
+        } catch (err) {
+          console.error("Error loading data:", err);
+        }
+      }
+
+      function renderCharts(data) {
+        const statusCount = {},
+          siteCount = {},
+          acceptedByCount = {},
+          madeByCount = {},
+          typeCount = {},
+          projectCount = {},
+          requestDateCount = {};
+
+        data.forEach((req) => {
+          statusCount[req.status || "Pending"] =
+            (statusCount[req.status || "Pending"] || 0) + 1;
+          siteCount[req.site || "Unknown"] =
+            (siteCount[req.site || "Unknown"] || 0) + 1;
+          acceptedByCount[req.acceptedBy || "Unassigned"] =
+            (acceptedByCount[req.acceptedBy || "Unassigned"] || 0) + 1;
+          madeByCount[req.madeBy || "Unspecified"] =
+            (madeByCount[req.madeBy || "Unspecified"] || 0) + 1;
+          (req.requestType || "-")
+            .split(",")
+            .map((s) => s.trim())
+            .forEach((type) => {
+              typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+          projectCount[req.project || "Unassigned"] =
+            (projectCount[req.project || "Unassigned"] || 0) + 1;
+          const date = req.requestDate?.split("T")[0];
+          if (date) requestDateCount[date] = (requestDateCount[date] || 0) + 1;
+        });
+
+        renderDonutChart(statusCount);
+        renderGeoChart(siteCount);
+        renderBarChart(acceptedByCount, "acceptedByChart", "Accepted");
+        renderRadarChart(projectCount);
+        renderTimeChart(requestDateCount);
+        renderBarChart(madeByCount, "madeByChart", "Made By");
+        renderBarChart(typeCount, "typeChart", "Request Types");
+        renderMonthlyVolumeChart(data);
+        renderCompletionBreakdown(data);
+      }
+
+      function renderDonutChart(counts) {
+        new Chart(document.getElementById("grayDonut"), {
+          type: "doughnut",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                data: Object.values(counts),
+                backgroundColor: [
+                  "#f39c12",
+                  "#2ecc71",
+                  "#e74c3c",
+                  "#9b59b6",
+                  "#3498db",
+                ],
+              },
+            ],
+          },
+          options: {
+            cutout: "60%",
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+      }
+
+      function renderGeoChart(counts) {
+        google.charts.load("current", { packages: ["geochart"] });
+        google.charts.setOnLoadCallback(() => {
+          const rows = Object.entries(counts);
+          const dataTable = google.visualization.arrayToDataTable([
+            ["Country", "Requests"],
+            ...rows,
+          ]);
+          const options = {
+            colorAxis: { colors: ["#f4c20d", "#0f9d58"] },
+            datalessRegionColor: "#eaeaea",
+          };
+          new google.visualization.GeoChart(
+            document.getElementById("regions_div")
+          ).draw(dataTable, options);
+        });
+      }
+
+      function renderBarChart(counts, canvasId, label) {
+        new Chart(document.getElementById(canvasId), {
+          type: "bar",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                label: label,
+                data: Object.values(counts),
+                backgroundColor: "#36A2EB",
+              },
+            ],
+          },
+          options: { responsive: true, plugins: { legend: { display: true } } },
+        });
+      }
+
+      function renderRadarChart(counts) {
+        new Chart(document.getElementById("radarChart"), {
+          type: "radar",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                label: "Project Requests",
+                data: Object.values(counts),
+                backgroundColor: "rgba(102, 153, 255, 0.2)",
+                borderColor: "#6699ff",
+              },
+            ],
+          },
+          options: { plugins: { legend: { position: "top" } } },
+        });
+      }
+
+      function renderTimeChart(counts) {
+        const dates = Object.keys(counts).sort();
+        const values = dates.map((d) => counts[d]);
+        Plotly.newPlot(
+          "timeChart",
+          [
+            {
+              x: dates,
+              y: values,
+              type: "scatter",
+              mode: "lines+markers",
+              name: "Request Trend",
+              line: { color: "#007bff" },
+            },
+          ],
+          { xaxis: { title: "Date", type: "date" }, yaxis: { title: "Count" } }
+        );
+      }
+
+      function renderMonthlyVolumeChart(data) {
+        const monthlyCounts = {};
+        data.forEach((req) => {
+          const date = req.requestDate?.split("T")[0];
+          if (date) {
+            const month = date.slice(0, 7);
+            monthlyCounts[month] = (monthlyCounts[month] || 0) + 1;
+          }
+        });
+        const sortedMonths = Object.keys(monthlyCounts).sort();
+        const values = sortedMonths.map((m) => monthlyCounts[m]);
+        const ctx = document.getElementById("monthlyChart").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: sortedMonths,
+            datasets: [
+              {
+                label: "Requests per Month",
+                data: values,
+                backgroundColor: "#ffa726",
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              title: { display: true, text: "Monthly Request Volume" },
+            },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+
+      function renderCompletionBreakdown(data) {
+        const statusBuckets = {
+          Completed: 0,
+          "In Work": 0,
+          Closed: 0,
+          Pending: 0,
+          Accepted: 0,
+          Rejected: 0,
+        };
+        data.forEach((req) => {
+          const status = req.status || "Pending";
+          if (statusBuckets[status] !== undefined) statusBuckets[status]++;
+          else statusBuckets[status] = 1;
+        });
+        const ctx = document.getElementById("completionChart").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: Object.keys(statusBuckets),
+            datasets: [
+              {
+                label: "Request Count",
+                data: Object.values(statusBuckets),
+                backgroundColor: [
+                  "#66bb6a",
+                  "#42a5f5",
+                  "#78909c",
+                  "#ffee58",
+                  "#ab47bc",
+                  "#ef5350",
+                ],
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            plugins: {
+              title: { display: true, text: "Status Distribution" },
+              legend: { display: false },
+            },
+          },
+        });
+      }
+
+      window.onload = loadDashboardData;
+    </script>
+  </body>
+</html>
